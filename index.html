@@ -94,8 +94,8 @@
         <input type="submit" value="Générer l'histoire">
     </form>
 
-    <h2>Votre histoire:</h2>
-    <p id="story">Veuillez patienter, l'histoire est en cours de génération...</p>
+    <h2 id="storyTitle" style="display: none;">Votre histoire:</h2>
+    <p id="story"></p>
 </div>
 
 <script>
@@ -108,7 +108,8 @@
 
         var formElements = event.target.elements;
         var formData = new FormData();
-
+        var storyTitle = document.querySelector('#storyTitle');
+        storyTitle.style.display = 'block';
         storyElement.innerText = "Veuillez patienter, l'histoire est en cours de génération...";
 
         for (var i = 0; i < formElements.length; i++) {
