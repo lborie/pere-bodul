@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Story Generator</title>
+</head>
+
+<body>
+    <h1>Story Generator</h1>
+
+    <form id="storyForm">
+        <label for="age">Âge:</label><br>
+        <input type="number" id="age" name="age"><br>
+        <label for="hero">Héros:</label><br>
+        <input type="text" id="hero" name="hero"><br>
+        <label for="villain">Méchant:</label><br>
+        <input type="text" id="villain" name="villain"><br>
+        <label for="location">Lieu:</label><br>
+        <input type="text" id="location" name="location"><br>
+        <label for="objects">Objets (séparés par des virgules):</label><br>
+        <input type="text" id="objects" name="objects"><br>
+        <input type="submit" value="Générer l'histoire">
+    </form>
+
+    <h2>Votre histoire:</h2>
+    <p id="story"></p>
+
+    <script>
+        document.querySelector('#storyForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            var formElements = event.target.elements;
+            var formData = new FormData();
+
+            for (var i = 0; i < formElements.length; i++) {
+                if (formElements[i].name) {
+                    formData.append(formElements[i].name, formElements[i].value);
+                }
+            }
+
+            fetch('/generateStory', {
+                method: 'POST',
+                body: new URLSearchParams(formData),
+            })
+            .then(response => response.text())
+            .then(data => {
+                document.querySelector('#story').innerText = data;
+            });
+        });
+    </script>
+</body>
+
+</html>
