@@ -2,52 +2,118 @@
 <html>
 
 <head>
-    <title>Story Generator</title>
+    <title>Père Bodul</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+        }
+
+        .container {
+            width: 80%;
+            margin: auto;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #343a40;
+        }
+
+        form {
+            background-color: #ffffff;
+            border-radius: 5px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        input[type="text"],
+        input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            border: 1px solid #ced4da;
+        }
+
+        input[type="submit"] {
+            background-color: #007bff;
+            color: #ffffff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+
+        #story {
+            background-color: #ffffff;
+            border-radius: 5px;
+            padding: 20px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+    </style>
 </head>
 
 <body>
-    <h1>Story Generator</h1>
+<div class="container">
+    <h1>Père Bodul</h1>
 
     <form id="storyForm">
-        <label for="age">Âge:</label><br>
-        <input type="number" id="age" name="age"><br>
-        <label for="hero">Héros:</label><br>
-        <input type="text" id="hero" name="hero"><br>
-        <label for="villain">Méchant:</label><br>
-        <input type="text" id="villain" name="villain"><br>
-        <label for="location">Lieu:</label><br>
-        <input type="text" id="location" name="location"><br>
-        <label for="objects">Objets (séparés par des virgules):</label><br>
-        <input type="text" id="objects" name="objects"><br>
+        <label for="age">Âge:</label>
+        <input type="number" id="age" name="age">
+        <label for="hero">Héros:</label>
+        <input type="text" id="hero" name="hero">
+        <label for="villain">Méchant:</label>
+        <input type="text" id="villain" name="villain">
+        <label for="location">Lieu:</label>
+        <input type="text" id="location" name="location">
+        <label for="objects">Objets (séparés par des virgules):</label>
+        <input type="text" id="objects" name="objects">
         <input type="submit" value="Générer l'histoire">
     </form>
 
     <h2>Votre histoire:</h2>
-    <p id="story"></p>
+    <p id="story">Veuillez patienter, l'histoire est en cours de génération...</p>
+</div>
 
-    <script>
-        document.querySelector('#storyForm').addEventListener('submit', function (event) {
-            event.preventDefault();
+<script>
+    document.querySelector('#storyForm').addEventListener('submit', function (event) {
+        event.preventDefault();
 
-            var formElements = event.target.elements;
-            var formData = new FormData();
+        var formElements = event.target.elements;
+        var formData = new FormData();
+        var storyElement = document.querySelector('#story');
 
-            for (var i = 0; i < formElements.length; i++) {
-                if (formElements[i].name) {
-                    formData.append(formElements[i].name, formElements[i].value);
-                }
+        storyElement.innerText = "Veuillez patienter, l'histoire est en cours de génération...";
+
+        for (var i = 0; i < formElements.length; i++) {
+            if (formElements[i].name) {
+                formData.append(formElements[i].name, formElements[i].value);
             }
+        }
 
-            fetch('/generateStory', {
-                method: 'POST',
-                body: new URLSearchParams(formData),
-            })
+        fetch('/generateStory', {
+            method: 'POST',
+            body: new URLSearchParams(formData),
+        })
             .then(response => response.text())
             .then(data => {
-                document.querySelector('#story').innerText = data;
+                storyElement.innerText = data;
             });
-        });
-    </script>
+    });
+</script>
 </body>
 
 </html>

@@ -22,61 +22,65 @@ type StoryParams struct {
 }
 
 type GPT3Response struct {
-	ID      string `json:"id"`
-	Object  string `json:"object"`
-	Created int    `json:"created"`
-	Model   string `json:"model"`
 	Choices []struct {
-		Text string `json:"text"`
+		Message struct {
+			Role    string `json:"role"`
+			Content string `json:"content"`
+		} `json:"message"`
+		FinishReason string `json:"finish_reason"`
+		Index        int    `json:"index"`
 	} `json:"choices"`
 }
 
 var openAIKey string
 
 func generateStory(params StoryParams) (string, error) {
-    prompt := fmt.Sprintf("Créez une histoire pour un enfant de %d ans. Le héros de l'histoire est %s. Le méchant est %s. L'histoire se déroule à %s. L'histoire doit inclure les objets suivants : %s.",
-        params.Age, params.Hero, params.Villain, params.Location, strings.Join(params.Objects, ", "))
+	prompt := fmt.Sprintf("Créez une histoire pour un enfant de %d ans. Le héros de l'histoire est %s. Le méchant est %s. L'histoire se déroule à %s. L'histoire doit inclure les objets suivants : %s.",
+		params.Age, params.Hero, params.Villain, params.Location, strings.Join(params.Objects, ", "))
 
-    requestBody, _ := json.Marshal(map[string]interface{}{
-        "model": "gpt-3.5-turbo",
-        "messages": []map[string]string{
-            {
-                "role": "system",
-                "content": "Créer une histoire.",
-            },
-            {
-                "role": "user",
-                "content": prompt,
-            },
-        },
-    })
+	requestBody, _ := json.Marshal(map[string]interface{}{
+		"model": "gpt-3.5-turbo",
+		"messages": []map[string]string{
+			{
+				"role":    "system",
+				"content": "Créer une histoire.",
+			},
+			{
+				"role":    "user",
+				"content": prompt,
+			},
+		},
+	})
 
-    request, _ := http.NewRequest("POST", "https://api.openai.com/v1/chat/completions", bytes.NewBuffer(requestBody))
-    request.Header.Set("Content-Type", "application/json")
-    request.Header.Set("Authorization", "Bearer " + openAIKey)
+	request, _ := http.NewRequest("POST", "https://api.openai.com/v1/chat/completions", bytes.NewBuffer(requestBody))
+	request.Header.Set("Content-Type", "application/json")
+	request.Header.Set("Authorization", "Bearer "+openAIKey)
 
-    client := &http.Client{}
-    response, err := client.Do(request)
+	client := &http.Client{}
+	response, err := client.Do(request)
 
-    if err != nil {
-        return "", err
-    }
-    defer response.Body.Close()
+	if err != nil {
+		return "", err
+	}
+	defer response.Body.Close()
 
-    if response.StatusCode != http.StatusOK {
-        return "", errors.New("La requête à GPT-3 a échoué avec le status : " + response.Status)
-    }
+	if response.StatusCode != http.StatusOK {
+		return "", errors.New("La requête à GPT-3 a échoué avec le status : " + response.Status)
+	}
 
-    body, _ := io.ReadAll(response.Body)
+	body, _ := io.ReadAll(response.Body)
 
-    var gpt3Response GPT3Response
-    json.Unmarshal(body, &gpt3Response)
+	var gpt3Response GPT3Response
+	err = json.Unmarshal(body, &gpt3Response)
+	if err != nil {
+		return "", err
+	}
 
-    if len(gpt3Response.Choices) > 0 {
-        return gpt3Response.Choices[0].Text, nil
-    }
+	if len(gpt3Response.Choices) > 0 && gpt3Response.Choices[0].Message.Role == "assistant" {
+		return gpt3Response.Choices[0].Message.Content, nil
+	}
 
-    return "", errors.New("GPT-3 n'a pas renvoyé de texte")
+	return "", errors.New("GPT-3 n'a pas renvoyé de texte")
 }
 func storyHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
