@@ -89,12 +89,15 @@
 </div>
 
 <script>
-    document.querySelector('#storyForm').addEventListener('submit', function (event) {
+    var storyForm = document.querySelector('#storyForm');
+    var storyElement = document.querySelector('#story');
+    var synth = window.speechSynthesis;
+
+    storyForm.addEventListener('submit', function (event) {
         event.preventDefault();
 
         var formElements = event.target.elements;
         var formData = new FormData();
-        var storyElement = document.querySelector('#story');
 
         storyElement.innerText = "Veuillez patienter, l'histoire est en cours de génération...";
 
@@ -111,8 +114,26 @@
             .then(response => response.text())
             .then(data => {
                 storyElement.innerText = data;
+                speak(data);
             });
     });
+
+    function speak(text) {
+        if (synth.speaking) {
+            console.error('speechSynthesis.speaking');
+            return;
+        }
+        if (text !== '') {
+            var utterThis = new SpeechSynthesisUtterance(text);
+            utterThis.onend = function (event) {
+                console.log('SpeechSynthesisUtterance.onend');
+            }
+            utterThis.onerror = function (event) {
+                console.error('SpeechSynthesisUtterance.onerror');
+            }
+            synth.speak(utterThis);
+        }
+    }
 </script>
 </body>
 
