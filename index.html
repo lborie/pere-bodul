@@ -17,9 +17,20 @@
         }
 
         .container {
+            display: flex;
+            justify-content: space-between;
             width: 80%;
             margin: auto;
             padding: 20px;
+        }
+
+        #storyForm {
+            flex: 1;
+            margin-right: 20px;
+        }
+
+        #storyContainer {
+            flex: 1;
         }
 
         h1 {
@@ -77,9 +88,8 @@
 </head>
 
 <body>
+<h1>Père Bodul</h1>
 <div class="container">
-    <h1>Père Bodul</h1>
-
     <form id="storyForm">
         <label for="age">Âge de l'enfant:</label>
         <input type="number" id="age" name="age">
@@ -94,8 +104,10 @@
         <input type="submit" value="Générer l'histoire">
     </form>
 
-    <h2 id="storyTitle" style="display: none;">Votre histoire:</h2>
-    <p id="story"></p>
+    <div id="storyContainer">
+        <h2 id="storyTitle" style="display: none;">Votre histoire:</h2>
+        <p id="story"></p>
+    </div>
 </div>
 
 <script>
