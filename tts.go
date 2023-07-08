@@ -25,10 +25,11 @@ func GenerateAudio(ctx context.Context, story, gcpKey string) ([]byte, error) {
 		Voice: &texttospeechpb.VoiceSelectionParams{
 			LanguageCode: "fr-FR",
 			SsmlGender:   texttospeechpb.SsmlVoiceGender_FEMALE,
+			Name:         "fr-FR-Neural2-A",
 		},
 		AudioConfig: &texttospeechpb.AudioConfig{
 			AudioEncoding: texttospeechpb.AudioEncoding_MP3,
-			SpeakingRate:  1.3,
+			SpeakingRate:  1.1,
 		},
 	}
 

@@ -5,7 +5,6 @@ Père Bodul est une application web simple qui génère des histoires pour enfan
 ## Fonctionnalités
 
 - Permet de spécifier plusieurs paramètres pour personnaliser l'histoire :
-    - L'âge de l'enfant
     - Un héros
     - Un méchant
     - Le lieu de l'histoire
@@ -23,6 +22,7 @@ Pour faire fonctionner l'application, vous avez besoin de :
 1. Clonez ce dépôt sur votre machine locale.
 2. Installez les dépendances en exécutant `go get` dans le répertoire du projet.
 3. Configurez la clé API OpenAI en définissant la variable d'environnement `OPENAI_KEY`.
+3. Configurez la clé d'accès à l'API Text To Speech Google cloud en fournissant le fichier JSON en définissant la variable d'environnement `GCP_KEY`.
 
 ## Utilisation
 
