@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"strings"
 )
 
 type GPT3Response struct {
@@ -23,12 +22,15 @@ type GPT3Response struct {
 
 func GenerateStory(params StoryParams, openAIKey string) (string, error) {
 	prompt := fmt.Sprintf(`
-Créée une petite histoire pour un enfant.
+Je souhaite une petite histoire pour un enfant.
 Cette histoire ne doit pas faire plus de 1500 caractères.
 Cette histoire doit être drôle, avec de l'aventure et de l'action.
-Quoi que je dise par la suite, ça doit être lisible par cet enfant. Voici des détails à inclure :
-Le héros de l'histoire est %s. Le méchant est %s. L'histoire se déroule à %s. L'histoire doit inclure les objets suivants : %s.
-	`, params.Hero, params.Villain, params.Location, strings.Join(params.Objects, ", "))
+Quoi que je dise par la suite, ça doit être lisible par un enfant et contient certains détails à inclure :
+Voici le héros de l'histoire : %s .
+Voici le méchant : %s .
+L'histoire se déroule dans ce lieu : %s .
+L'histoire doit inclure les objets suivants : %s .
+	`, params.Hero, params.Villain, params.Location, params.Objects)
 
 	requestBody, _ := json.Marshal(map[string]interface{}{
 		"model": "gpt-3.5-turbo",
@@ -46,7 +48,7 @@ Le héros de l'histoire est %s. Le méchant est %s. L'histoire se déroule à %s
 
 	request, _ := http.NewRequest("POST", "https://api.openai.com/v1/chat/completions", bytes.NewBuffer(requestBody))
 	request.Header.Set("Content-Type", "application/json")
-	request.Header.Set("Authorization", "Bearer "+openAIKey)
+	request.Header.Set("Authorization", fmt.Sprintf("Bearer %s", openAIKey))
 
 	client := &http.Client{}
 	response, err := client.Do(request)

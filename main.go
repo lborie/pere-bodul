@@ -6,14 +6,13 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"strings"
 )
 
 type StoryParams struct {
 	Hero     string
 	Villain  string
 	Location string
-	Objects  []string
+	Objects  string
 }
 
 var openAIKey string
@@ -31,7 +30,7 @@ func storyHandler(w http.ResponseWriter, r *http.Request) {
 			Hero:     r.Form.Get("hero"),
 			Villain:  r.Form.Get("villain"),
 			Location: r.Form.Get("location"),
-			Objects:  strings.Split(r.Form.Get("objects"), ","),
+			Objects:  r.Form.Get("objects"),
 		}
 
 		story, err := GenerateStory(storyParams, openAIKey)

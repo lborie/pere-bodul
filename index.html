@@ -76,7 +76,11 @@
             cursor: pointer;
         }
 
-        input[type="submit"]:hover {
+        input[type="submit"]:disabled {
+            background-color: grey;
+        }
+
+        input[type="submit"]:hover:enabled {
             background-color: #0056b3;
         }
 
@@ -103,9 +107,9 @@
         <input type="text" id="villain" name="villain">
         <label for="location">Où se situe l'histoire ?</label>
         <input type="text" id="location" name="location">
-        <label for="objects">Objets à inclure dans l'histoire (séparés par des virgules):</label>
+        <label for="objects">Objets à inclure dans l'histoire :</label>
         <input type="text" id="objects" name="objects">
-        <input type="submit" value="Générer l'histoire">
+        <input type="submit" id="actionButton" value="Générer l'histoire">
     </form>
 
     <div id="storyContainer">
@@ -116,10 +120,15 @@
     </div>
 </div>
 
+<div>
+    Fait avec ❤️ par <a target="_blank" href="https://github.com/lborie/pere-bodul">Bodul avec l'assistance de ChatGPT</a>
+</div>
+
 <script>
     var storyForm = document.querySelector('#storyForm');
     var storyElement = document.querySelector('#story');
     var playerElement = document.querySelector('#player');
+    var actionButton = document.querySelector('#actionButton');
 
     storyForm.addEventListener('submit', function (event) {
         event.preventDefault();
@@ -127,6 +136,8 @@
         var formElements = event.target.elements;
         var formData = new FormData();
         storyElement.innerText = "Veuillez patienter, l'histoire est en cours de génération...";
+        actionButton.disabled = true;
+        actionButton.value = "Génération en cours...";
 
         for (var i = 0; i < formElements.length; i++) {
             if (formElements[i].name) {
@@ -143,6 +154,8 @@
                 data = JSON.parse(data);
                 storyElement.innerText = data.story;
                 playerElement.src = 'data:audio/mpeg;base64,' + data.audio;
+                actionButton.disabled = false;
+                actionButton.value = "Re-Générer une histoire";
             });
     });
 </script>
