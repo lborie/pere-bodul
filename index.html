@@ -2,24 +2,26 @@
 <html>
 
 <head>
-    <title>Père Bodul</title>
+    <title>Père Bodul, raconte-nous un histoire !</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #f8f9fa;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             height: 100vh;
+            background: url("/background.png") center no-repeat;
+            background-size: cover;
         }
 
         .container {
             display: flex;
             justify-content: space-between;
             width: 80%;
+            height: 80%;
             margin: auto;
             padding: 20px;
         }
@@ -82,17 +84,19 @@
             background-color: #ffffff;
             border-radius: 5px;
             padding: 20px;
+            margin-bottom: 20px;
             box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
         }
     </style>
 </head>
 
 <body>
-<h1>Père Bodul</h1>
+<h1>Père Bodul, raconte-nous une histoire !</h1>
 <div class="container">
     <form id="storyForm">
-        <label for="age">Âge de l'enfant:</label>
-        <input type="number" id="age" name="age">
         <label for="hero">Qui est le héro ?</label>
         <input type="text" id="hero" name="hero">
         <label for="villain">Parlez moi du méchant ?</label>
@@ -105,23 +109,23 @@
     </form>
 
     <div id="storyContainer">
-        <h2 id="storyTitle" style="display: none;">Votre histoire:</h2>
-        <p id="story"></p>
+        <audio controls id="player"></audio>
+        <p id="story">
+            Quelle histoire souhaitez-vous générer ?
+        </p>
     </div>
 </div>
 
 <script>
     var storyForm = document.querySelector('#storyForm');
     var storyElement = document.querySelector('#story');
-    var synth = window.speechSynthesis;
+    var playerElement = document.querySelector('#player');
 
     storyForm.addEventListener('submit', function (event) {
         event.preventDefault();
 
         var formElements = event.target.elements;
         var formData = new FormData();
-        var storyTitle = document.querySelector('#storyTitle');
-        storyTitle.style.display = 'block';
         storyElement.innerText = "Veuillez patienter, l'histoire est en cours de génération...";
 
         for (var i = 0; i < formElements.length; i++) {
@@ -136,27 +140,11 @@
         })
             .then(response => response.text())
             .then(data => {
-                storyElement.innerText = data;
-                speak(data);
+                data = JSON.parse(data);
+                storyElement.innerText = data.story;
+                playerElement.src = 'data:audio/mpeg;base64,' + data.audio;
             });
     });
-
-    function speak(text) {
-        if (synth.speaking) {
-            console.error('speechSynthesis.speaking');
-            return;
-        }
-        if (text !== '') {
-            var utterThis = new SpeechSynthesisUtterance(text);
-            utterThis.onend = function (event) {
-                console.log('SpeechSynthesisUtterance.onend');
-            }
-            utterThis.onerror = function (event) {
-                console.error('SpeechSynthesisUtterance.onerror');
-            }
-            synth.speak(utterThis);
-        }
-    }
 </script>
 </body>
 

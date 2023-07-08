@@ -1,87 +1,24 @@
 package main
 
 import (
-	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
-	"io"
 	"log"
 	"net/http"
 	"os"
-	"strconv"
 	"strings"
 )
 
 type StoryParams struct {
-	Age      int
 	Hero     string
 	Villain  string
 	Location string
 	Objects  []string
 }
 
-type GPT3Response struct {
-	Choices []struct {
-		Message struct {
-			Role    string `json:"role"`
-			Content string `json:"content"`
-		} `json:"message"`
-		FinishReason string `json:"finish_reason"`
-		Index        int    `json:"index"`
-	} `json:"choices"`
-}
-
 var openAIKey string
+var gcpKey string
 
-func generateStory(params StoryParams) (string, error) {
-	prompt := fmt.Sprintf("Créez une histoire pour un enfant de %d ans. Le héros de l'histoire est %s. Le méchant est %s. L'histoire se déroule à %s. L'histoire doit inclure les objets suivants : %s.",
-		params.Age, params.Hero, params.Villain, params.Location, strings.Join(params.Objects, ", "))
-
-	requestBody, _ := json.Marshal(map[string]interface{}{
-		"model": "gpt-3.5-turbo",
-		"messages": []map[string]string{
-			{
-				"role":    "system",
-				"content": "Créer une histoire.",
-			},
-			{
-				"role":    "user",
-				"content": prompt,
-			},
-		},
-	})
-
-	request, _ := http.NewRequest("POST", "https://api.openai.com/v1/chat/completions", bytes.NewBuffer(requestBody))
-	request.Header.Set("Content-Type", "application/json")
-	request.Header.Set("Authorization", "Bearer "+openAIKey)
-
-	client := &http.Client{}
-	response, err := client.Do(request)
-
-	if err != nil {
-		return "", err
-	}
-	defer response.Body.Close()
-
-	if response.StatusCode != http.StatusOK {
-		return "", errors.New("La requête à GPT-3 a échoué avec le status : " + response.Status)
-	}
-
-	body, _ := io.ReadAll(response.Body)
-
-	var gpt3Response GPT3Response
-	err = json.Unmarshal(body, &gpt3Response)
-	if err != nil {
-		return "", err
-	}
-
-	if len(gpt3Response.Choices) > 0 && gpt3Response.Choices[0].Message.Role == "assistant" {
-		return gpt3Response.Choices[0].Message.Content, nil
-	}
-
-	return "", errors.New("GPT-3 n'a pas renvoyé de texte")
-}
 func storyHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
 		err := r.ParseForm()
@@ -90,52 +27,62 @@ func storyHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		age, err := strconv.Atoi(r.Form.Get("age"))
-		if err != nil {
-			http.Error(w, "Erreur lors de la conversion de l'âge en entier", http.StatusBadRequest)
-			return
-		}
-
-		hero := r.Form.Get("hero")
-		villain := r.Form.Get("villain")
-		location := r.Form.Get("location")
-
-		objectsStr := r.Form.Get("objects")
-		objects := strings.Split(objectsStr, ",")
-
 		storyParams := StoryParams{
-			Age:      age,
-			Hero:     hero,
-			Villain:  villain,
-			Location: location,
-			Objects:  objects,
+			Hero:     r.Form.Get("hero"),
+			Villain:  r.Form.Get("villain"),
+			Location: r.Form.Get("location"),
+			Objects:  strings.Split(r.Form.Get("objects"), ","),
 		}
 
-		story, err := generateStory(storyParams)
+		story, err := GenerateStory(storyParams, openAIKey)
 		if err != nil {
 			http.Error(w, fmt.Sprintf("Erreur lors de la génération de l'histoire : %s", err.Error()), http.StatusInternalServerError)
 			return
 		}
 
-		w.Write([]byte(story))
+		log.Default().Printf("story generated : %s", story)
+
+		audio, err := GenerateAudio(r.Context(), story, gcpKey)
+		if err != nil {
+			http.Error(w, fmt.Sprintf("Erreur lors de la génération du son : %s", err.Error()), http.StatusInternalServerError)
+			return
+		}
+
+		// Send JSON
+		w.Header().Set("Content-Type", "application/json")
+		data := map[string]any{
+			"story": story,
+			"audio": audio,
+		}
+		err = json.NewEncoder(w).Encode(data)
+		if err != nil {
+			http.Error(w, fmt.Sprintf("Erreur lors de la sérialisation en JSON : %s", err.Error()), http.StatusInternalServerError)
+			return
+		}
 	} else {
 		http.Error(w, "Méthode non autorisée", http.StatusMethodNotAllowed)
 	}
 }
 
-func indexHandler(w http.ResponseWriter, r *http.Request) {
-	http.ServeFile(w, r, "index.html")
-}
-
 func main() {
-
 	openAIKey = os.Getenv("OPENAI_KEY")
 	if openAIKey == "" {
 		log.Fatal("OPENAI_KEY n'est pas défini")
+		return
+	}
+	gcpKey = os.Getenv("GCP_KEY")
+	if gcpKey == "" {
+		log.Fatal("GCP_KEY n'est pas défini")
+		return
 	}
 
 	http.HandleFunc("/generateStory", storyHandler)
-	http.HandleFunc("/", indexHandler)
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "index.html")
+	})
+	http.HandleFunc("/background.png", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "background.png")
+	})
 
 	fmt.Println("Le serveur tourne sur le port 8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
