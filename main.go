@@ -6,6 +6,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+
+	"github.com/sirupsen/logrus"
 )
 
 type StoryParams struct {
@@ -22,6 +24,7 @@ func storyHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
 		err := r.ParseForm()
 		if err != nil {
+			logrus.Error("erreur lors de l'analyse du formulaire : %s", err.Error())
 			http.Error(w, "Erreur lors de l'analyse du formulaire", http.StatusInternalServerError)
 			return
 		}
@@ -33,17 +36,21 @@ func storyHandler(w http.ResponseWriter, r *http.Request) {
 			Objects:  r.Form.Get("objects"),
 		}
 
+		logrus.Infof("new form submitted: %v", storyParams)
+
 		story, err := GenerateStory(storyParams, openAIKey)
 		if err != nil {
-			http.Error(w, fmt.Sprintf("Erreur lors de la génération de l'histoire : %s", err.Error()), http.StatusInternalServerError)
+			logrus.Errorf("erreur lors de la génération de l'histoire : %s", err.Error())
+			http.Error(w, "Erreur lors de la génération de l'histoire", http.StatusInternalServerError)
 			return
 		}
 
-		log.Default().Printf("story generated : %s", story)
+		logrus.Infof("story generated : %s", story)
 
 		audio, err := GenerateAudio(r.Context(), story, gcpKey)
 		if err != nil {
-			http.Error(w, fmt.Sprintf("Erreur lors de la génération du son : %s", err.Error()), http.StatusInternalServerError)
+			logrus.Errorf("erreur lors de la génération du son : %s", err.Error())
+			http.Error(w, "Erreur lors de la génération du son", http.StatusInternalServerError)
 			return
 		}
 
@@ -55,10 +62,12 @@ func storyHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		err = json.NewEncoder(w).Encode(data)
 		if err != nil {
-			http.Error(w, fmt.Sprintf("Erreur lors de la sérialisation en JSON : %s", err.Error()), http.StatusInternalServerError)
+			logrus.Errorf("Erreur lors de la sérialisation en JSON : %s", err.Error())
+			http.Error(w, "Erreur lors de la sérialisation en JSON ", http.StatusInternalServerError)
 			return
 		}
 	} else {
+		logrus.Error("Méthode non autorisée")
 		http.Error(w, "Méthode non autorisée", http.StatusMethodNotAllowed)
 	}
 }
@@ -77,6 +86,7 @@ func main() {
 
 	http.HandleFunc("/generateStory", storyHandler)
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		logrus.Info("Serving index.html")
 		http.ServeFile(w, r, "index.html")
 	})
 	http.HandleFunc("/background.png", func(w http.ResponseWriter, r *http.Request) {

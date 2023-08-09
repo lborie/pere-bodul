@@ -9,7 +9,7 @@ import (
 	"net/http"
 )
 
-type GPT3Response struct {
+type GPTResponse struct {
 	Choices []struct {
 		Message struct {
 			Role    string `json:"role"`
@@ -33,7 +33,7 @@ L'histoire doit inclure les objets suivants : %s .
 	`, params.Hero, params.Villain, params.Location, params.Objects)
 
 	requestBody, _ := json.Marshal(map[string]interface{}{
-		"model": "gpt-3.5-turbo",
+		"model": "gpt-4",
 		"messages": []map[string]string{
 			{
 				"role":    "system",
@@ -62,18 +62,18 @@ L'histoire doit inclure les objets suivants : %s .
 
 	body, _ := io.ReadAll(response.Body)
 	if response.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("la requête à GPT-3 a échoué avec le status : %s et le body : %s", response.Status, string(body))
+		return "", fmt.Errorf("la requête à GPT-4 a échoué avec le status : %s et le body : %s", response.Status, string(body))
 	}
 
-	var gpt3Response GPT3Response
-	err = json.Unmarshal(body, &gpt3Response)
+	var gptResponse GPTResponse
+	err = json.Unmarshal(body, &gptResponse)
 	if err != nil {
 		return "", err
 	}
 
-	if len(gpt3Response.Choices) > 0 && gpt3Response.Choices[0].Message.Role == "assistant" {
-		return gpt3Response.Choices[0].Message.Content, nil
+	if len(gptResponse.Choices) > 0 && gptResponse.Choices[0].Message.Role == "assistant" {
+		return gptResponse.Choices[0].Message.Content, nil
 	}
 
-	return "", errors.New("GPT-3 n'a pas renvoyé de texte")
+	return "", errors.New("GPT-4 n'a pas renvoyé de texte")
 }
