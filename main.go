@@ -86,7 +86,7 @@ func main() {
 
 	http.HandleFunc("/generateStory", storyHandler)
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		logrus.Info("Serving index.html")
+		logrus.Infof("Serving index.html with user-agent : %s", r.UserAgent())
 		http.ServeFile(w, r, "index.html")
 	})
 	http.HandleFunc("/background.png", func(w http.ResponseWriter, r *http.Request) {
