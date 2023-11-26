@@ -84,6 +84,8 @@ func storyHandler(w http.ResponseWriter, r *http.Request) {
 		audio := <-audioChan
 		image := <-imageChan
 
+		logrus.Infof("image link : %s", image)
+
 		// Send JSON
 		w.Header().Set("Content-Type", "application/json")
 		data := map[string]any{
