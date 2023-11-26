@@ -8,9 +8,17 @@ import (
 	"google.golang.org/api/option"
 )
 
-func GenerateAudio(ctx context.Context, story, gcpKey string) ([]byte, error) {
+type GCPClient struct {
+	GCPKey string
+}
+
+func (c GCPClient) GenerateStory(params StoryParams) (string, error) {
+	return "", fmt.Errorf("not implemented")
+}
+
+func (c GCPClient) GenerateAudio(ctx context.Context, story string) ([]byte, error) {
 	// Instantiates a client.
-	client, err := texttospeech.NewClient(ctx, option.WithCredentialsJSON([]byte(gcpKey)))
+	client, err := texttospeech.NewClient(ctx, option.WithCredentialsJSON([]byte(c.GCPKey)))
 	if err != nil {
 		return []byte(""), fmt.Errorf("error instantiating gcp client : %w", err)
 	}

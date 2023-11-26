@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -17,8 +18,12 @@ type StoryParams struct {
 	Objects  string
 }
 
-var openAIKey string
-var gcpKey string
+type PereBodulClient interface {
+	GenerateStory(params StoryParams) (string, error)
+	GenerateAudio(ctx context.Context, story string) ([]byte, error)
+}
+
+var pereBodulClient PereBodulClient
 
 func storyHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
@@ -38,7 +43,7 @@ func storyHandler(w http.ResponseWriter, r *http.Request) {
 
 		logrus.Infof("new form submitted: %v", storyParams)
 
-		story, err := GenerateStory(storyParams, openAIKey)
+		story, err := pereBodulClient.GenerateStory(storyParams)
 		if err != nil {
 			logrus.Errorf("erreur lors de la génération de l'histoire : %s", err.Error())
 			http.Error(w, "Erreur lors de la génération de l'histoire", http.StatusInternalServerError)
@@ -47,12 +52,13 @@ func storyHandler(w http.ResponseWriter, r *http.Request) {
 
 		logrus.Infof("story generated : %s", story)
 
-		audio, err := GenerateAudio(r.Context(), story, gcpKey)
+		audio, err := pereBodulClient.GenerateAudio(r.Context(), story)
 		if err != nil {
 			logrus.Errorf("erreur lors de la génération du son : %s", err.Error())
 			http.Error(w, "Erreur lors de la génération du son", http.StatusInternalServerError)
 			return
 		}
+		logrus.Infof("audio generated")
 
 		// Send JSON
 		w.Header().Set("Content-Type", "application/json")
@@ -73,17 +79,24 @@ func storyHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	openAIKey = os.Getenv("OPENAI_KEY")
+	openAIKey := os.Getenv("OPENAI_KEY")
 	if openAIKey == "" {
 		log.Fatal("OPENAI_KEY n'est pas défini")
 		return
 	}
-	gcpKey = os.Getenv("GCP_KEY")
-	if gcpKey == "" {
-		log.Fatal("GCP_KEY n'est pas défini")
-		return
+	pereBodulClient = OpenAIClient{
+		OpenAIKey: openAIKey,
 	}
-
+	/*
+		gcpKey := os.Getenv("GCP_KEY")
+		if gcpKey == "" {
+			log.Fatal("GCP_KEY n'est pas défini")
+			return
+		}
+		gcpClient = &GCPClient{
+			GCPKey: gcpKey,
+		}
+	*/
 	http.HandleFunc("/generateStory", storyHandler)
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		logrus.Infof("Serving index.html with user-agent : %s", r.UserAgent())
