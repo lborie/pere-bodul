@@ -30,7 +30,7 @@ func (c OpenAIClient) GenerateStory(params StoryParams) (string, error) {
 		params.Hero, params.Villain, params.Location, params.Objects)
 
 	requestBody, _ := json.Marshal(map[string]interface{}{
-		"model": "gpt-4-1106-preview",
+		"model": "gpt-4",
 		"messages": []map[string]string{
 			{
 				"role":    "system",
