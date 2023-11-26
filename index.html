@@ -31,7 +31,13 @@
         }
 
         #storyContainer {
-            flex: 1;
+            flex: 2;
+            margin-right: 20px;
+        }
+
+        #metadataContainer {
+            flex: 2;
+            justify-content: space-between;
         }
 
         h1 {
@@ -112,10 +118,13 @@
     </form>
 
     <div id="storyContainer">
-        <audio controls id="player"></audio>
         <p id="story">
             Quelle histoire souhaitez-vous générer ?
         </p>
+    </div>
+    <div id = "metadataContainer">
+        <audio controls id="player" hidden></audio>
+        <a id="imageLink" target="_blank" hidden><img id="image" width="100%" hidden/></a>
     </div>
 </div>
 
@@ -129,6 +138,8 @@
     var storyElement = document.querySelector('#story');
     var playerElement = document.querySelector('#player');
     var actionButton = document.querySelector('#actionButton');
+    var image = document.querySelector('#image');
+    var imageLink = document.querySelector('#imageLink');
 
     storyForm.addEventListener('submit', function (event) {
         event.preventDefault();
@@ -154,8 +165,13 @@
                 data = JSON.parse(data);
                 storyElement.innerText = data.story;
                 playerElement.src = 'data:audio/mpeg;base64,' + data.audio;
+                playerElement.hidden = false;
                 actionButton.disabled = false;
                 actionButton.value = "Re-Générer une histoire";
+                image.hidden = false;
+                image.src = data.imageUrl;
+                imageLink.hidden = false;
+                imageLink.href = data.imageUrl;
             });
     });
 </script>

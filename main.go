@@ -21,6 +21,7 @@ type StoryParams struct {
 type PereBodulClient interface {
 	GenerateStory(params StoryParams) (string, error)
 	GenerateAudio(ctx context.Context, story string) ([]byte, error)
+	GenerateImage(ctx context.Context, story string) (string, error)
 }
 
 var pereBodulClient PereBodulClient
@@ -52,19 +53,43 @@ func storyHandler(w http.ResponseWriter, r *http.Request) {
 
 		logrus.Infof("story generated : %s", story)
 
-		audio, err := pereBodulClient.GenerateAudio(r.Context(), story)
-		if err != nil {
-			logrus.Errorf("erreur lors de la génération du son : %s", err.Error())
-			http.Error(w, "Erreur lors de la génération du son", http.StatusInternalServerError)
-			return
-		}
-		logrus.Infof("audio generated")
+		// Parallelize steps 2 and 3 with channels
+		audioChan := make(chan []byte, 1)
+		defer close(audioChan)
+		imageChan := make(chan string, 1)
+		defer close(imageChan)
+
+		go func(ctx context.Context, story string) {
+			logrus.Info("generating audio")
+			audio, err := pereBodulClient.GenerateAudio(ctx, story)
+			if err != nil {
+				logrus.Errorf("erreur lors de la génération du son : %s", err.Error())
+				audioChan <- []byte("")
+			}
+			logrus.Info("audio generated")
+			audioChan <- audio
+		}(r.Context(), story)
+
+		go func(ctx context.Context, story string) {
+			logrus.Info("generating image")
+			image, err := pereBodulClient.GenerateImage(ctx, story)
+			if err != nil {
+				logrus.Errorf("erreur lors de la génération de l'image : %s", err.Error())
+				imageChan <- ""
+			}
+			logrus.Infof("image generated")
+			imageChan <- image
+		}(r.Context(), story)
+
+		audio := <-audioChan
+		image := <-imageChan
 
 		// Send JSON
 		w.Header().Set("Content-Type", "application/json")
 		data := map[string]any{
-			"story": story,
-			"audio": audio,
+			"story":    story,
+			"audio":    audio,
+			"imageUrl": image,
 		}
 		err = json.NewEncoder(w).Encode(data)
 		if err != nil {

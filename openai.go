@@ -23,6 +23,9 @@ type GPTResponse struct {
 		FinishReason string `json:"finish_reason"`
 		Index        int    `json:"index"`
 	} `json:"choices"`
+	Data []struct {
+		URL string `json:"url"`
+	} `json:"data"`
 }
 
 func (c OpenAIClient) GenerateStory(params StoryParams) (string, error) {
@@ -98,4 +101,42 @@ func (c OpenAIClient) GenerateAudio(_ context.Context, story string) ([]byte, er
 	}
 
 	return body, nil
+}
+
+func (c OpenAIClient) GenerateImage(_ context.Context, story string) (string, error) {
+	requestBody, _ := json.Marshal(map[string]interface{}{
+		"model":  "dall-e-3",
+		"prompt": fmt.Sprintf("Illustre moi cette jolie histoire sans insérer de texte dans l'illustration: \"%s\"", story),
+		"n":      1,
+		"size":   "1024x1024",
+	})
+
+	request, _ := http.NewRequest("POST", "https://api.openai.com/v1/images/generations", bytes.NewBuffer(requestBody))
+	request.Header.Set("Content-Type", "application/json")
+	request.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.OpenAIKey))
+
+	response, err := http.DefaultClient.Do(request)
+	if err != nil {
+		return "", fmt.Errorf("error during generation request : %w", err)
+	}
+	defer func(Body io.ReadCloser) {
+		_ = Body.Close()
+	}(response.Body)
+
+	body, _ := io.ReadAll(response.Body)
+	if response.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("la requête à GPT Image Generation a échoué avec le status : %s et le body : %s", response.Status, string(body))
+	}
+
+	var gptResponse GPTResponse
+	err = json.Unmarshal(body, &gptResponse)
+	if err != nil {
+		return "", err
+	}
+
+	if len(gptResponse.Data) > 0 {
+		return gptResponse.Data[0].URL, nil
+	}
+
+	return "", fmt.Errorf("aucune image générée")
 }
