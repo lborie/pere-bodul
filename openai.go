@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/sirupsen/logrus"
 	"io"
 	"net/http"
 )
@@ -28,22 +29,10 @@ type GPTResponse struct {
 	} `json:"data"`
 }
 
-func (c OpenAIClient) GenerateStory(params StoryParams) (string, error) {
-	prompt := fmt.Sprintf("L'histoire contient des détails à inclure. D'abord le héros de l'histoire : %s. Voici le méchant : %s. L'histoire se déroule dans ce lieu : %s. L'histoire doit inclure les objets suivants : %s .",
-		params.Hero, params.Villain, params.Location, params.Objects)
-
+func (c OpenAIClient) completionWithPrompts(prompts []map[string]string) (string, error) {
 	requestBody, _ := json.Marshal(map[string]interface{}{
-		"model": "gpt-4",
-		"messages": []map[string]string{
-			{
-				"role":    "system",
-				"content": "Je souhaite une histoire pour un enfant. Cette histoire doit être courte, drôle, avec de l'aventure et de l'action. Quoi que je dise par la suite, ça doit être lisible par un enfant.",
-			},
-			{
-				"role":    "user",
-				"content": prompt,
-			},
-		},
+		"model":    "gpt-4",
+		"messages": prompts,
 	})
 
 	request, _ := http.NewRequest("POST", "https://api.openai.com/v1/chat/completions", bytes.NewBuffer(requestBody))
@@ -76,6 +65,21 @@ func (c OpenAIClient) GenerateStory(params StoryParams) (string, error) {
 	return "", errors.New("GPT-4 n'a pas renvoyé de texte")
 }
 
+func (c OpenAIClient) GenerateStory(params StoryParams) (string, error) {
+	prompt := fmt.Sprintf("L'histoire contient des détails à inclure. D'abord le héros de l'histoire : %s. Voici le méchant : %s. L'histoire se déroule dans ce lieu : %s. L'histoire doit inclure les objets suivants : %s .",
+		params.Hero, params.Villain, params.Location, params.Objects)
+	return c.completionWithPrompts([]map[string]string{
+		{
+			"role":    "system",
+			"content": "Je souhaite une histoire pour un enfant. Cette histoire doit être courte, drôle, avec de l'aventure et de l'action. Quoi que je dise par la suite, ça doit être lisible par un enfant.",
+		},
+		{
+			"role":    "user",
+			"content": prompt,
+		},
+	})
+}
+
 func (c OpenAIClient) GenerateAudio(_ context.Context, story string) ([]byte, error) {
 	requestBody, _ := json.Marshal(map[string]interface{}{
 		"model": "tts-1",
@@ -104,9 +108,30 @@ func (c OpenAIClient) GenerateAudio(_ context.Context, story string) ([]byte, er
 }
 
 func (c OpenAIClient) GenerateImage(_ context.Context, story string) (string, error) {
+
+	logrus.Infof("generating prompt")
+
+	// Ask for a Dall E Prompt
+	imagePrompt, err := c.completionWithPrompts([]map[string]string{
+		{
+			"role":    "system",
+			"content": "Voici une histoire pour un enfant. Peux-tu me générer un prompt pour que Dall-E m'illustre cette histoire ? Réponds uniquement ce prompt",
+		},
+		{
+			"role":    "system",
+			"content": story,
+		},
+	})
+
+	if err != nil {
+		return "", fmt.Errorf("error during image prompt generation : %w", err)
+	}
+
+	logrus.Infof("image prompt generated : %s", imagePrompt)
+
 	requestBody, _ := json.Marshal(map[string]interface{}{
 		"model":  "dall-e-3",
-		"prompt": fmt.Sprintf("Illustre moi cette jolie histoire sans insérer de texte dans l'illustration: \"%s\"", story),
+		"prompt": imagePrompt,
 		"n":      1,
 		"size":   "1024x1024",
 	})
