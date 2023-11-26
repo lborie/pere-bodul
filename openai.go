@@ -29,7 +29,7 @@ type GPTResponse struct {
 }
 
 func (c OpenAIClient) GenerateStory(params StoryParams) (string, error) {
-	prompt := fmt.Sprintf("Voici le héros de l'histoire : %s. Voici le méchant : %s. L'histoire se déroule dans ce lieu : %s. L'histoire doit inclure les objets suivants : %s .",
+	prompt := fmt.Sprintf("L'histoire contient des détails à inclure. D'abord le héros de l'histoire : %s. Voici le méchant : %s. L'histoire se déroule dans ce lieu : %s. L'histoire doit inclure les objets suivants : %s .",
 		params.Hero, params.Villain, params.Location, params.Objects)
 
 	requestBody, _ := json.Marshal(map[string]interface{}{
@@ -37,7 +37,7 @@ func (c OpenAIClient) GenerateStory(params StoryParams) (string, error) {
 		"messages": []map[string]string{
 			{
 				"role":    "system",
-				"content": "Je souhaite une petite histoire pour un enfant. Cette histoire ne doit pas faire plus de 1500 caractères. Cette histoire doit être drôle, avec de l'aventure et de l'action. Quoi que je dise par la suite, ça doit être lisible par un enfant et contient certains détails à inclure.",
+				"content": "Je souhaite une histoire pour un enfant. Cette histoire doit être courte, drôle, avec de l'aventure et de l'action. Quoi que je dise par la suite, ça doit être lisible par un enfant.",
 			},
 			{
 				"role":    "user",
