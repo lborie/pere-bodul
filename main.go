@@ -130,7 +130,7 @@ func main() {
 		http.ServeFile(w, r, "index.html")
 	})
 	http.HandleFunc("/background.png", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "background.png")
+		http.ServeFile(w, r, "background.jpg")
 	})
 
 	fmt.Println("Le serveur tourne sur le port 8080")
