@@ -12,32 +12,8 @@
             align-items: center;
             justify-content: center;
             height: 100vh;
-            background: url("/background.png") center no-repeat;
+            background: url("/background.jpg") center no-repeat;
             background-size: cover;
-        }
-
-        .container {
-            display: flex;
-            justify-content: space-between;
-            width: 80%;
-            height: 80%;
-            margin: auto;
-            padding: 20px;
-        }
-
-        #storyForm {
-            flex: 1;
-            margin-right: 20px;
-        }
-
-        #storyContainer {
-            flex: 2;
-            margin-right: 20px;
-        }
-
-        #metadataContainer {
-            flex: 2;
-            justify-content: space-between;
         }
 
         h1 {
@@ -52,7 +28,6 @@
             background-color: #ffffff;
             border-radius: 5px;
             padding: 20px;
-            margin-bottom: 20px;
             box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
             display: flex;
             flex-direction: column;
@@ -62,6 +37,42 @@
         label {
             display: block;
             margin-bottom: 5px;
+        }
+
+        .container {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            width: 80%;
+            height: 80%;
+            margin: auto;
+            padding: 20px;
+        }
+
+        #storyForm {
+            flex: 1;
+        }
+
+        #storyContainer {
+            flex: 2;
+            max-height: 100%;
+            overflow: auto;
+            border-radius: 5px;
+        }
+
+        #metadataContainer {
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
+        }
+
+        #imageLink {
+            // cadre autour de l'image
+            display: block;
+            border: 10px solid white;
+            border-radius: 5px;
         }
 
         input[type="text"],
@@ -93,14 +104,14 @@
         }
 
         #story {
-            background-color: #ffffff;
-            border-radius: 5px;
             padding: 20px;
-            margin-bottom: 20px;
             box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
             display: flex;
             flex-direction: column;
             align-items: flex-start;
+            background-color: #ffffff;
+            border-radius: 5px;
+            margin: 0;
         }
     </style>
 </head>
@@ -131,7 +142,7 @@
     </div>
 </div>
 
-<div>
+<div id="bottom">
     Fait avec ❤️ par <a target="_blank" href="https://github.com/lborie/pere-bodul">Bodul avec l'assistance de
     ChatGPT</a>
 </div>

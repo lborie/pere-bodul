@@ -129,7 +129,7 @@ func main() {
 		logrus.Infof("Serving index.html with user-agent : %s", r.UserAgent())
 		http.ServeFile(w, r, "index.html")
 	})
-	http.HandleFunc("/background.png", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/background.jpg", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "background.jpg")
 	})
 
