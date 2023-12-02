@@ -2,69 +2,97 @@
 <html lang="fr">
 <head>
     <title>Père Bodul, raconte-nous un histoire !</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Pacifico">
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: Pacifico, Arial, sans-serif;
             margin: 0;
             padding: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            height: 100vh;
+            justify-content: space-between;
             background: url("/background.jpg") center no-repeat;
             background-size: cover;
+            height: 100vh;
+            gap: 10px;
         }
 
-        h1 {
-            border-radius: 5px;
-            background-color: #ffffff;
+        h2 {
             text-align: center;
             color: #343a40;
-            padding: 10px;
         }
 
-        form {
-            background-color: #ffffff;
+        audio {
+            border: 10px solid white;
             border-radius: 5px;
-            padding: 20px;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            flex: 2;
             display: flex;
             flex-direction: column;
-            align-items: flex-start;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 5px;
+            gap: 10px;
+            align-items: center;
+            background-color: #ffffff;
+            border-radius: 5px;
+            margin-top: 20px;
+            width: 90%;
         }
 
         .container {
             display: flex;
+            flex: 7;
             justify-content: space-between;
-            gap: 20px;
-            width: 80%;
-            height: 80%;
             margin: auto;
-            padding: 20px;
+            padding-left: 10px;
+            padding-right: 10px;
+            max-height: 70vh;
+            gap: 10px;
+            width: 90%
+        }
+
+        .bottom {
+            display: flex;
+            flex: 1;
+            align-items: center;
+        }
+
+        .storyElement {
+            display: flex;
+            flex: 1;
+            flex-direction: column;
+            gap: 10px;
         }
 
         #storyForm {
-            flex: 1;
+            display: flex;
+            flex-direction: row;
+            gap: 50px;
+            justify-content: space-between;
+            padding: 0 50px;
+            width: 90%;
         }
 
         #storyContainer {
-            flex: 2;
-            max-height: 100%;
-            overflow: auto;
+            display: flex;
+            flex: 1;
             border-radius: 5px;
+            gap: 10px;
+
+            flex-direction: column;
+        }
+
+        #story {
+            background-color: #ffffff;
+            border-radius: 5px;
+            padding: 20px;
+            overflow-y: scroll;
         }
 
         #metadataContainer {
-            flex: 2;
             display: flex;
-            flex-direction: column;
-            gap: 20px;
+            flex: 1;
             align-items: center;
         }
 
@@ -73,10 +101,15 @@
             display: block;
             border: 10px solid white;
             border-radius: 5px;
+            margin: auto;
         }
 
-        input[type="text"],
-        input[type="number"] {
+        #image {
+            max-width: 100%;
+            max-height: 65vh;
+        }
+
+        input[type="text"] {
             width: 100%;
             padding: 10px;
             margin-bottom: 20px;
@@ -103,46 +136,44 @@
             background-color: #0056b3;
         }
 
-        #story {
-            padding: 20px;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            background-color: #ffffff;
-            border-radius: 5px;
-            margin: 0;
-        }
     </style>
 </head>
 
 <body>
-<h1>Père Bodul, raconte-nous une histoire !</h1>
-<div class="container">
+<div class="header">
+    <h2>Père Bodul, raconte-nous une histoire !</h2>
     <form id="storyForm">
-        <label for="hero">Qui est le héro ?</label>
-        <input type="text" id="hero" name="hero">
-        <label for="villain">Parlez moi du méchant ?</label>
-        <input type="text" id="villain" name="villain">
-        <label for="location">Où se situe l'histoire ?</label>
-        <input type="text" id="location" name="location">
-        <label for="objects">Objets à inclure dans l'histoire :</label>
-        <input type="text" id="objects" name="objects">
+        <div class="storyElement">
+            <label for="hero">Qui est le héro ?</label>
+            <input type="text" id="hero" name="hero">
+        </div>
+        <div class="storyElement">
+            <label for="villain">Parlez moi du méchant ?</label>
+            <input type="text" id="villain" name="villain">
+        </div>
+        <div class="storyElement">
+            <label for="location">Où se situe l'histoire ?</label>
+            <input type="text" id="location" name="location">
+        </div>
+        <div class="storyElement">
+            <label for="objects">Objets à inclure dans l'histoire :</label>
+            <input type="text" id="objects" name="objects">
+        </div>
         <input type="submit" id="actionButton" value="Générer l'histoire">
     </form>
+</div>
 
+<div class="container">
     <div id="storyContainer">
-        <p id="story">
-            Quelle histoire souhaitez-vous générer ?
-        </p>
+        <audio controls id="player" hidden></audio>
+        <div id="story">Quelle histoire souhaitez-vous générer ?</div>
     </div>
     <div id = "metadataContainer">
-        <audio controls id="player" hidden></audio>
-        <a id="imageLink" target="_blank" hidden><img id="image" width="100%" hidden/></a>
+        <a id="imageLink" target="_blank" hidden><img id="image" hidden/></a>
     </div>
 </div>
 
-<div id="bottom">
+<div class="bottom">
     Fait avec ❤️ par <a target="_blank" href="https://github.com/lborie/pere-bodul">Bodul avec l'assistance de
     ChatGPT</a>
 </div>
