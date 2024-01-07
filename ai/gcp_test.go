@@ -1,4 +1,4 @@
-package main
+package ai
 
 import (
 	texttospeech "cloud.google.com/go/texttospeech/apiv1"

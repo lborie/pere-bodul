@@ -1,6 +1,7 @@
-package main
+package ai
 
 import (
+	aiplatform "cloud.google.com/go/aiplatform/apiv1"
 	texttospeech "cloud.google.com/go/texttospeech/apiv1"
 	"cloud.google.com/go/texttospeech/apiv1/texttospeechpb"
 	"context"
@@ -9,7 +10,12 @@ import (
 )
 
 type GCPClient struct {
-	GCPKey string
+	GCPKey        string
+	DataSetClient *aiplatform.DatasetClient
+}
+
+func (c GCPClient) GenerateImage(ctx context.Context, story string) (string, error) {
+	return "", fmt.Errorf("not implemented")
 }
 
 func (c GCPClient) GenerateStory(params StoryParams) (string, error) {
