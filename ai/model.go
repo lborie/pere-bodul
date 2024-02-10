@@ -10,10 +10,15 @@ type StoryParams struct {
 }
 
 type PereBodulClient interface {
-	GenerateStory(params StoryParams) (string, error)
+	GenerateStory(ctx context.Context, params StoryParams) (string, error)
 	GenerateAudio(ctx context.Context, story string) ([]byte, error)
 	GenerateImage(ctx context.Context, story string) (string, error)
 }
+
+type PereBodulImpl string
+
+var OpenAIImpl PereBodulImpl = "openai"
+var GCPImpl PereBodulImpl = "gcp"
 
 var OpenAI PereBodulClient
 var VertexAI PereBodulClient

@@ -22,7 +22,7 @@ Pour faire fonctionner l'application, vous avez besoin de :
 1. Clonez ce dépôt sur votre machine locale.
 2. Installez les dépendances en exécutant `go get` dans le répertoire du projet.
 3. Configurez la clé API OpenAI en définissant la variable d'environnement `OPENAI_KEY`.
-3. Configurez la clé d'accès à l'API Text To Speech Google cloud en fournissant le fichier JSON en définissant la variable d'environnement `GCP_KEY`.
+3. Configurez la clé d'accès à l'API Google Cloud en fournissant le fichier JSON en définissant les variables d'environnement `GCP_KEY` (contenu du fichier JSON) et en définissant la clé `GCP_PROJECT_ID`.
 
 ## Utilisation
 

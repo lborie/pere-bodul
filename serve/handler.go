@@ -26,11 +26,14 @@ func StoryHandler(w http.ResponseWriter, r *http.Request) {
 
 		logrus.Infof("new form submitted: %v", storyParams)
 
-		// For this request, default client is GCPClient from main.go
+		// Implementation chosen by the user
+		pereBodulClient := ai.OpenAI
+		implChosen := ai.PereBodulImpl(r.Form.Get("ai_impl"))
+		if implChosen == ai.GCPImpl {
+			pereBodulClient = ai.VertexAI
+		}
 
-		pereBodulClient := ai.VertexAI
-
-		story, err := pereBodulClient.GenerateStory(storyParams)
+		story, err := pereBodulClient.GenerateStory(r.Context(), storyParams)
 		if err != nil {
 			logrus.Errorf("erreur lors de la génération de l'histoire : %s", err.Error())
 			http.Error(w, "Erreur lors de la génération de l'histoire", http.StatusInternalServerError)

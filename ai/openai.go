@@ -31,7 +31,7 @@ type GPTResponse struct {
 
 func (c OpenAIClient) completionWithPrompts(prompts []map[string]string) (string, error) {
 	requestBody, _ := json.Marshal(map[string]interface{}{
-		"model":    "gpt-4",
+		"model":    "gpt-4-turbo-preview",
 		"messages": prompts,
 	})
 
@@ -65,7 +65,7 @@ func (c OpenAIClient) completionWithPrompts(prompts []map[string]string) (string
 	return "", errors.New("GPT-4 n'a pas renvoyé de texte")
 }
 
-func (c OpenAIClient) GenerateStory(params StoryParams) (string, error) {
+func (c OpenAIClient) GenerateStory(_ context.Context, params StoryParams) (string, error) {
 	prompt := fmt.Sprintf("L'histoire contient des détails à inclure. D'abord le héros de l'histoire : %s. Voici le méchant : %s. L'histoire se déroule dans ce lieu : %s. L'histoire doit inclure les objets suivants : %s .",
 		params.Hero, params.Villain, params.Location, params.Objects)
 	return c.completionWithPrompts([]map[string]string{
