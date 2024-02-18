@@ -1,10 +1,12 @@
 package main
 
 import (
+	texttospeech "cloud.google.com/go/texttospeech/apiv1"
 	"context"
 	"fmt"
 	"github.com/lborie/pere-bodul/ai"
 	"github.com/lborie/pere-bodul/serve"
+	"google.golang.org/api/option"
 	"log"
 	"net/http"
 	"os"
@@ -24,15 +26,27 @@ func main() {
 
 	// Instantiate GCP Client
 	gcpKey := os.Getenv("GCP_KEY")
-	if gcpKey != "" {
-		client, err := aiplatform.NewDatasetClient(context.Background())
+	gcpProject := os.Getenv("GCP_PROJECT_ID")
+	if gcpKey != "" && gcpProject != "" {
+		predictClient, err := aiplatform.NewPredictionClient(context.Background(), option.WithCredentialsJSON([]byte(gcpKey)), option.WithEndpoint("us-central1-aiplatform.googleapis.com:443"))
 		if err != nil {
 			log.Fatalf("can't instantiate GCP client : %s", err.Error())
 			return
 		}
+		// Instantiates a client.
+		textoToSpeechClient, err := texttospeech.NewClient(context.Background(), option.WithCredentialsJSON([]byte(gcpKey)))
+		if err != nil {
+			log.Fatalf("error instantiating gcp client : %s", err.Error())
+		}
+		defer func(client *texttospeech.Client, client2 *aiplatform.PredictionClient) {
+			_ = client.Close()
+			_ = client2.Close()
+		}(textoToSpeechClient, predictClient)
+
 		ai.VertexAI = &ai.GCPClient{
-			GCPKey:        gcpKey,
-			DataSetClient: client,
+			PredictionClient:   predictClient,
+			TextToSpeechClient: textoToSpeechClient,
+			PredictURL:         fmt.Sprintf("projects/%s/locations/us-central1/publishers/google/models/text-bison", gcpProject),
 		}
 	}
 
@@ -45,10 +59,10 @@ func main() {
 	http.HandleFunc("/generateStory", serve.StoryHandler)
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		logrus.Infof("Serving index.html with user-agent : %s", r.UserAgent())
-		http.ServeFile(w, r, "front/index.html")
+		http.ServeFile(w, r, "serve/index.html")
 	})
 	http.HandleFunc("/background.jpg", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "front/background.jpg")
+		http.ServeFile(w, r, "serve/background.jpg")
 	})
 
 	fmt.Println("Le serveur tourne sur le port 8080")

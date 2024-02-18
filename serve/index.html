@@ -144,6 +144,13 @@
     <h2>Père Bodul, raconte-nous une histoire !</h2>
     <form id="storyForm">
         <div class="storyElement">
+            <label for="ai_impl">Quel magicien écrit l'histoire ?</label>
+            <select id="ai_impl" name="ai_impl">
+                <option value="gcp">GCP</option>
+                <option value="openai">OpenAI</option>
+            </select>
+        </div>
+        <div class="storyElement">
             <label for="hero">Qui est le héro ?</label>
             <input type="text" id="hero" name="hero">
         </div>
