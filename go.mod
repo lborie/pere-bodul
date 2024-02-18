@@ -5,8 +5,10 @@ go 1.21
 require (
 	cloud.google.com/go/aiplatform v1.59.0
 	cloud.google.com/go/texttospeech v1.7.5
+	cloud.google.com/go/vertexai v0.7.1
 	github.com/sirupsen/logrus v1.9.3
 	google.golang.org/api v0.163.0
+	google.golang.org/protobuf v1.32.0
 )
 
 require (
@@ -41,5 +43,4 @@ require (
 	google.golang.org/genproto/googleapis/api v0.0.0-20240205150955-31a09d347014 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240205150955-31a09d347014 // indirect
 	google.golang.org/grpc v1.61.0 // indirect
-	google.golang.org/protobuf v1.32.0 // indirect
 )

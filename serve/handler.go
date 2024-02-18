@@ -30,7 +30,9 @@ func StoryHandler(w http.ResponseWriter, r *http.Request) {
 		pereBodulClient := ai.OpenAI
 		implChosen := ai.PereBodulImpl(r.Form.Get("ai_impl"))
 		if implChosen == ai.GCPImpl {
-			pereBodulClient = ai.VertexAI
+			pereBodulClient = ai.AIPlatform
+		} else if implChosen == ai.GeminiImpl {
+			pereBodulClient = ai.Gemini
 		}
 
 		story, err := pereBodulClient.GenerateStory(r.Context(), storyParams)
@@ -40,7 +42,7 @@ func StoryHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		logrus.Infof("story generated : %s", story)
+		logrus.Infof("story generated with %s : %s", implChosen, story)
 
 		// Parallelize steps 2 and 3 with channels
 		audioChan := make(chan []byte, 1)

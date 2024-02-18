@@ -19,6 +19,8 @@ type PereBodulImpl string
 
 var OpenAIImpl PereBodulImpl = "openai"
 var GCPImpl PereBodulImpl = "gcp"
+var GeminiImpl PereBodulImpl = "gemini"
 
 var OpenAI PereBodulClient
-var VertexAI PereBodulClient
+var AIPlatform PereBodulClient
+var Gemini PereBodulClient

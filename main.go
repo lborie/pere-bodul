@@ -12,6 +12,7 @@ import (
 	"os"
 
 	aiplatform "cloud.google.com/go/aiplatform/apiv1"
+	"cloud.google.com/go/vertexai/genai"
 	"github.com/sirupsen/logrus"
 )
 
@@ -33,6 +34,11 @@ func main() {
 			log.Fatalf("can't instantiate GCP client : %s", err.Error())
 			return
 		}
+		genaiClient, err := genai.NewClient(context.TODO(), gcpProject, "us-central1", option.WithCredentialsJSON([]byte(gcpKey)))
+		if err != nil {
+			log.Fatalf("can't instantiate Gemini client : %s", err.Error())
+			return
+		}
 		// Instantiates a client.
 		textoToSpeechClient, err := texttospeech.NewClient(context.Background(), option.WithCredentialsJSON([]byte(gcpKey)))
 		if err != nil {
@@ -43,15 +49,20 @@ func main() {
 			_ = client2.Close()
 		}(textoToSpeechClient, predictClient)
 
-		ai.VertexAI = &ai.GCPClient{
+		ai.AIPlatform = &ai.GCPClient{
 			PredictionClient:   predictClient,
 			TextToSpeechClient: textoToSpeechClient,
-			PredictURL:         fmt.Sprintf("projects/%s/locations/us-central1/publishers/google/models/text-bison", gcpProject),
+			PredictURL:         fmt.Sprintf("projects/%s/locations/us-central1/publishers/google/models/gemini-pro", gcpProject),
+		}
+
+		ai.Gemini = &ai.GeminiClient{
+			GenAIClient:        genaiClient,
+			TextToSpeechClient: textoToSpeechClient,
 		}
 	}
 
 	// If no client, panic
-	if ai.OpenAI == nil && ai.VertexAI == nil {
+	if ai.OpenAI == nil && ai.AIPlatform == nil {
 		log.Fatal("no client instantiated")
 		return
 	}
