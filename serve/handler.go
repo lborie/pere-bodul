@@ -61,7 +61,9 @@ func StoryHandler(w http.ResponseWriter, r *http.Request) {
 
 		go func(ctx context.Context, story string) {
 			logrus.Info("generating image")
-			image, err := pereBodulClient.GenerateImage(ctx, story)
+			// TODO : implements image Generation with GCP. Restricted for now
+			//image, err := pereBodulClient.GenerateImage(ctx, story)
+			image, err := ai.OpenAI.GenerateImage(ctx, story)
 			if err != nil {
 				logrus.Errorf("erreur lors de la génération de l'image : %s", err.Error())
 				imageChan <- ""
