@@ -52,7 +52,7 @@ func main() {
 		ai.AIPlatform = &ai.GCPClient{
 			PredictionClient:   predictClient,
 			TextToSpeechClient: textoToSpeechClient,
-			PredictURL:         fmt.Sprintf("projects/%s/locations/us-central1/publishers/google/models/gemini-pro", gcpProject),
+			PredictURL:         fmt.Sprintf("projects/%s/locations/us-central1/publishers/google/models/text-bison", gcpProject),
 		}
 
 		ai.Gemini = &ai.GeminiClient{
