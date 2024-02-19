@@ -12,7 +12,8 @@ type StoryParams struct {
 type PereBodulClient interface {
 	GenerateStory(ctx context.Context, params StoryParams) (string, error)
 	GenerateAudio(ctx context.Context, story string) ([]byte, error)
-	GenerateImage(ctx context.Context, story string) (string, error)
+	GenerateImage(ctx context.Context, imagePrompt string) (string, error)
+	GenerateImagePrompt(ctx context.Context, story string) (string, error)
 }
 
 type PereBodulImpl string

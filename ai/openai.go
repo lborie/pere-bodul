@@ -107,8 +107,7 @@ func (c OpenAIClient) GenerateAudio(_ context.Context, story string) ([]byte, er
 	return body, nil
 }
 
-func (c OpenAIClient) GenerateImage(_ context.Context, story string) (string, error) {
-
+func (c OpenAIClient) GenerateImagePrompt(_ context.Context, story string) (string, error) {
 	logrus.Infof("generating prompt")
 
 	// Ask for a Dall E Prompt
@@ -126,8 +125,11 @@ func (c OpenAIClient) GenerateImage(_ context.Context, story string) (string, er
 	if err != nil {
 		return "", fmt.Errorf("error during image prompt generation : %w", err)
 	}
-
 	logrus.Infof("image prompt generated : %s", imagePrompt)
+	return imagePrompt, nil
+}
+
+func (c OpenAIClient) GenerateImage(_ context.Context, imagePrompt string) (string, error) {
 
 	requestBody, _ := json.Marshal(map[string]interface{}{
 		"model":  "dall-e-3",

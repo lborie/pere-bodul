@@ -6,11 +6,27 @@ import (
 	"cloud.google.com/go/vertexai/genai"
 	"context"
 	"fmt"
+	"github.com/sirupsen/logrus"
 )
 
 type GeminiClient struct {
 	GenAIClient        *genai.Client
 	TextToSpeechClient *texttospeech.Client
+}
+
+func (c GeminiClient) GenerateImagePrompt(ctx context.Context, story string) (string, error) {
+	logrus.Infof("generating prompt")
+
+	prompt := fmt.Sprintf("Voici une histoire pour un enfant. Peux-tu me générer un prompt pour que l'ia générative Dall-E m'illustre cette histoire ? Réponds uniquement ce prompt. \"%s\"", story)
+	// Ask for a Dall E Prompt
+	gemini := c.GenAIClient.GenerativeModel("gemini-pro")
+	resp, err := gemini.GenerateContent(ctx, genai.Text(prompt))
+	if err != nil {
+		return "", fmt.Errorf("error during image prompt generation : %w", err)
+	}
+	imagePrompt := fmt.Sprintf("%s", resp.Candidates[0].Content.Parts[0])
+	logrus.Infof("image prompt generated : %s", imagePrompt)
+	return imagePrompt, nil
 }
 
 func (c GeminiClient) GenerateImage(ctx context.Context, story string) (string, error) {
@@ -21,8 +37,6 @@ func (c GeminiClient) GenerateStory(ctx context.Context, params StoryParams) (st
 	// Generate the story thanks to Gemini
 	prompt := fmt.Sprintf("Je souhaite une histoire pour un enfant. Cette histoire doit être courte, drôle, avec de l'aventure et de l'action. Quoi que je dise par la suite, ça doit être lisible par un enfant. L'histoire contient des détails à inclure. D'abord le héros de l'histoire : %s. Voici le méchant : %s. L'histoire se déroule dans ce lieu : %s. L'histoire doit inclure les objets suivants : %s .",
 		params.Hero, params.Villain, params.Location, params.Objects)
-
-	//gemini := c.GenAIClient.GenerativeModel("gemini-pro-vision")
 	gemini := c.GenAIClient.GenerativeModel("gemini-pro")
 	resp, err := gemini.GenerateContent(ctx, genai.Text(prompt))
 	if err != nil {

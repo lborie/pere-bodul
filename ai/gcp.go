@@ -7,6 +7,7 @@ import (
 	"cloud.google.com/go/texttospeech/apiv1/texttospeechpb"
 	"context"
 	"fmt"
+	"github.com/sirupsen/logrus"
 	"google.golang.org/protobuf/types/known/structpb"
 )
 
@@ -14,6 +15,36 @@ type GCPClient struct {
 	PredictionClient   *aiplatform.PredictionClient
 	TextToSpeechClient *texttospeech.Client
 	PredictURL         string
+}
+
+func (c GCPClient) GenerateImagePrompt(ctx context.Context, story string) (string, error) {
+	logrus.Infof("generating prompt")
+
+	prompt := fmt.Sprintf("Voici une histoire pour un enfant. Peux-tu me générer un prompt pour que l'ia générative Dall-E m'illustre cette histoire ? Réponds uniquement ce prompt. \"%s\"", story)
+	// Instances: the prompt to use with the text model
+	promptValue, err := structpb.NewValue(map[string]interface{}{
+		"prompt": prompt,
+	})
+
+	if err != nil {
+		return "", fmt.Errorf("error in promptValue: %w", err)
+	}
+	// Ask for a Dall E Prompt
+	// PredictRequest: create the model prediction request
+	req := &aiplatformpb.PredictRequest{
+		Endpoint:  c.PredictURL,
+		Instances: []*structpb.Value{promptValue},
+	}
+
+	// PredictResponse: receive the response from the model
+	resp, err := c.PredictionClient.Predict(ctx, req)
+	if err != nil {
+		return "", fmt.Errorf("error in prediction: %w", err)
+	}
+
+	imagePrompt := resp.Predictions[0].AsInterface().(map[string]interface{})["content"].(string)
+	logrus.Infof("image prompt generated : %s", imagePrompt)
+	return imagePrompt, nil
 }
 
 func (c GCPClient) GenerateImage(ctx context.Context, story string) (string, error) {
