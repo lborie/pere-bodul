@@ -44,10 +44,11 @@ func main() {
 		if err != nil {
 			log.Fatalf("error instantiating gcp client : %s", err.Error())
 		}
-		defer func(client *texttospeech.Client, client2 *aiplatform.PredictionClient) {
+		defer func(client *texttospeech.Client, client2 *aiplatform.PredictionClient, client3 *genai.Client) {
 			_ = client.Close()
 			_ = client2.Close()
-		}(textoToSpeechClient, predictClient)
+			_ = client3.Close()
+		}(textoToSpeechClient, predictClient, genaiClient)
 
 		ai.AIPlatform = &ai.GCPClient{
 			PredictionClient:   predictClient,
