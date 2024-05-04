@@ -2,26 +2,28 @@ package ai
 
 import "context"
 
+type Wizard string
+
+const GeminiWizard Wizard = "gemini-pro"
+const TextBizonWizard Wizard = "text-bison"
+const OpenAIWizard Wizard = "OpenAI"
+const Llama3Wizard Wizard = "llama3"
+
 type StoryParams struct {
 	Hero     string
 	Villain  string
 	Location string
 	Objects  string
+	Wizard   Wizard
 }
 
 type PereBodulClient interface {
 	GenerateStory(ctx context.Context, params StoryParams) (string, error)
-	GenerateAudio(ctx context.Context, story string) ([]byte, error)
-	GenerateImage(ctx context.Context, imagePrompt string) (string, error)
-	GenerateImagePrompt(ctx context.Context, story string) (string, error)
+	GenerateAudio(ctx context.Context, params StoryParams, story string) ([]byte, error)
+	GenerateImage(ctx context.Context, params StoryParams, imagePrompt string) (string, error)
+	GenerateImagePrompt(ctx context.Context, params StoryParams, story string) (string, error)
 }
 
-type PereBodulImpl string
-
-var OpenAIImpl PereBodulImpl = "openai"
-var GCPImpl PereBodulImpl = "gcp"
-var GeminiImpl PereBodulImpl = "gemini"
-
 var OpenAI PereBodulClient
-var AIPlatform PereBodulClient
-var Gemini PereBodulClient
+var AIPlatform PereBodulClient // Deprecated
+var VertexAI PereBodulClient

@@ -17,10 +17,10 @@ type GCPClient struct {
 	PredictURL         string
 }
 
-func (c GCPClient) GenerateImagePrompt(ctx context.Context, story string) (string, error) {
+func (c GCPClient) GenerateImagePrompt(ctx context.Context, _ StoryParams, story string) (string, error) {
 	logrus.Infof("generating prompt")
 
-	prompt := fmt.Sprintf("Voici une histoire pour un enfant. Peux-tu me générer un prompt pour que l'ia générative Dall-E m'illustre cette histoire ? Réponds uniquement ce prompt. \"%s\"", story)
+	prompt := fmt.Sprintf("Voici une histoire pour un enfant. Peux-tu me générer un prompt pour que l'ia générative Dall-E m'illustre cette histoire en une seule image ? Réponds uniquement ce prompt. \"%s\"", story)
 	// Instances: the prompt to use with the text model
 	promptValue, err := structpb.NewValue(map[string]interface{}{
 		"prompt": prompt,
@@ -47,7 +47,7 @@ func (c GCPClient) GenerateImagePrompt(ctx context.Context, story string) (strin
 	return imagePrompt, nil
 }
 
-func (c GCPClient) GenerateImage(ctx context.Context, story string) (string, error) {
+func (c GCPClient) GenerateImage(_ context.Context, _ StoryParams, _ string) (string, error) {
 	return "", fmt.Errorf("not implemented")
 }
 
@@ -81,7 +81,7 @@ func (c GCPClient) GenerateStory(ctx context.Context, params StoryParams) (strin
 	return resp.Predictions[0].AsInterface().(map[string]interface{})["content"].(string), nil
 }
 
-func (c GCPClient) GenerateAudio(ctx context.Context, story string) ([]byte, error) {
+func (c GCPClient) GenerateAudio(ctx context.Context, _ StoryParams, story string) ([]byte, error) {
 	req := texttospeechpb.SynthesizeSpeechRequest{
 		Input: &texttospeechpb.SynthesisInput{
 			InputSource: &texttospeechpb.SynthesisInput_Text{Text: story},

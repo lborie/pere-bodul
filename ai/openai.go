@@ -80,7 +80,7 @@ func (c OpenAIClient) GenerateStory(_ context.Context, params StoryParams) (stri
 	})
 }
 
-func (c OpenAIClient) GenerateAudio(_ context.Context, story string) ([]byte, error) {
+func (c OpenAIClient) GenerateAudio(_ context.Context, _ StoryParams, story string) ([]byte, error) {
 	requestBody, _ := json.Marshal(map[string]interface{}{
 		"model": "tts-1",
 		"input": story,
@@ -107,14 +107,14 @@ func (c OpenAIClient) GenerateAudio(_ context.Context, story string) ([]byte, er
 	return body, nil
 }
 
-func (c OpenAIClient) GenerateImagePrompt(_ context.Context, story string) (string, error) {
+func (c OpenAIClient) GenerateImagePrompt(_ context.Context, _ StoryParams, story string) (string, error) {
 	logrus.Infof("generating prompt")
 
 	// Ask for a Dall E Prompt
 	imagePrompt, err := c.completionWithPrompts([]map[string]string{
 		{
 			"role":    "system",
-			"content": "Voici une histoire pour un enfant. Peux-tu me générer un prompt pour que Dall-E m'illustre cette histoire ? Réponds uniquement ce prompt",
+			"content": "Voici une histoire pour un enfant. Peux-tu me générer un prompt pour que Dall-E m'illustre cette histoire en une seule image ? Réponds uniquement ce prompt",
 		},
 		{
 			"role":    "system",
@@ -129,7 +129,7 @@ func (c OpenAIClient) GenerateImagePrompt(_ context.Context, story string) (stri
 	return imagePrompt, nil
 }
 
-func (c OpenAIClient) GenerateImage(_ context.Context, imagePrompt string) (string, error) {
+func (c OpenAIClient) GenerateImage(_ context.Context, _ StoryParams, imagePrompt string) (string, error) {
 
 	requestBody, _ := json.Marshal(map[string]interface{}{
 		"model":  "dall-e-3",

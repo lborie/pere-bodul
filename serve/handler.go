@@ -17,22 +17,28 @@ func StoryHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		wizard := ai.Wizard(r.Form.Get("ai_impl"))
+		if wizard != ai.GeminiWizard && wizard != ai.TextBizonWizard && wizard != ai.OpenAIWizard && wizard != ai.Llama3Wizard {
+			logrus.Errorf("wizard %s non reconnu", wizard)
+			http.Error(w, "ai_impl non reconnu", http.StatusBadRequest)
+			return
+		}
 		storyParams := ai.StoryParams{
 			Hero:     r.Form.Get("hero"),
 			Villain:  r.Form.Get("villain"),
 			Location: r.Form.Get("location"),
 			Objects:  r.Form.Get("objects"),
+			Wizard:   wizard,
 		}
 
 		logrus.Infof("new form submitted: %v", storyParams)
 
 		// Implementation chosen by the user
 		pereBodulClient := ai.OpenAI
-		implChosen := ai.PereBodulImpl(r.Form.Get("ai_impl"))
-		if implChosen == ai.GCPImpl {
+		if wizard == ai.GeminiWizard {
+			pereBodulClient = ai.VertexAI
+		} else if wizard == ai.TextBizonWizard {
 			pereBodulClient = ai.AIPlatform
-		} else if implChosen == ai.GeminiImpl {
-			pereBodulClient = ai.Gemini
 		}
 
 		story, err := pereBodulClient.GenerateStory(r.Context(), storyParams)
@@ -42,7 +48,7 @@ func StoryHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		logrus.Infof("story generated with %s : %s", implChosen, story)
+		logrus.Infof("story generated with %s : %s", wizard, story)
 
 		// Parallelize steps 2 and 3 with channels
 		audioChan := make(chan []byte, 1)
@@ -52,7 +58,7 @@ func StoryHandler(w http.ResponseWriter, r *http.Request) {
 
 		go func(ctx context.Context, story string) {
 			logrus.Info("generating audio")
-			audio, err := pereBodulClient.GenerateAudio(ctx, story)
+			audio, err := pereBodulClient.GenerateAudio(ctx, storyParams, story)
 			if err != nil {
 				logrus.Errorf("erreur lors de la génération du son : %s", err.Error())
 				audioChan <- []byte("")
@@ -63,14 +69,14 @@ func StoryHandler(w http.ResponseWriter, r *http.Request) {
 
 		go func(ctx context.Context, story string) {
 			logrus.Info("generating image")
-			imagePrompt, err := pereBodulClient.GenerateImagePrompt(ctx, story)
+			imagePrompt, err := pereBodulClient.GenerateImagePrompt(ctx, storyParams, story)
 			if err != nil {
 				logrus.Errorf("erreur lors de la génération de l'image prompt : %s", err.Error())
 				imageChan <- ""
 			}
 			// TODO : implements image Generation with GCP. Restricted for now
 			//image, err := pereBodulClient.GenerateImage(ctx, story)
-			image, err := ai.OpenAI.GenerateImage(ctx, imagePrompt)
+			image, err := ai.OpenAI.GenerateImage(ctx, storyParams, imagePrompt)
 			if err != nil {
 				logrus.Errorf("erreur lors de la génération de l'image : %s", err.Error())
 				imageChan <- ""

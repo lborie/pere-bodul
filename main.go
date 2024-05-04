@@ -34,9 +34,9 @@ func main() {
 			log.Fatalf("can't instantiate GCP client : %s", err.Error())
 			return
 		}
-		genaiClient, err := genai.NewClient(context.TODO(), gcpProject, "us-central1", option.WithCredentialsJSON([]byte(gcpKey)))
+		genaiClient, err := genai.NewClient(context.Background(), gcpProject, "us-central1", option.WithCredentialsJSON([]byte(gcpKey)))
 		if err != nil {
-			log.Fatalf("can't instantiate Gemini client : %s", err.Error())
+			log.Fatalf("can't instantiate VertexAI client : %s", err.Error())
 			return
 		}
 		// Instantiates a client.
@@ -56,14 +56,14 @@ func main() {
 			PredictURL:         fmt.Sprintf("projects/%s/locations/us-central1/publishers/google/models/text-bison", gcpProject),
 		}
 
-		ai.Gemini = &ai.GeminiClient{
+		ai.VertexAI = &ai.VertexAIClient{
 			GenAIClient:        genaiClient,
 			TextToSpeechClient: textoToSpeechClient,
 		}
 	}
 
 	// If no client, panic
-	if ai.OpenAI == nil && ai.AIPlatform == nil {
+	if ai.OpenAI == nil && ai.VertexAI == nil {
 		log.Fatal("no client instantiated")
 		return
 	}
