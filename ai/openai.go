@@ -31,7 +31,7 @@ type GPTResponse struct {
 
 func (c OpenAIClient) completionWithPrompts(prompts []map[string]string) (string, error) {
 	requestBody, _ := json.Marshal(map[string]interface{}{
-		"model":    "gpt-4-turbo-preview",
+		"model":    "gpt-4o",
 		"messages": prompts,
 	})
 
