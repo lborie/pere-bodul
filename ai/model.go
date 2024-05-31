@@ -1,20 +1,24 @@
 package ai
 
-import "context"
+import (
+	"context"
+)
 
 type Wizard string
 
-const GeminiWizard Wizard = "gemini-pro"
+const GeminiWizard Wizard = "gemini-1.5-flash-001"
 const TextBizonWizard Wizard = "text-bison"
 const OpenAIWizard Wizard = "OpenAI"
 const Llama3Wizard Wizard = "llama3"
 
 type StoryParams struct {
-	Hero     string
-	Villain  string
-	Location string
-	Objects  string
-	Wizard   Wizard
+	Hero      string
+	Villain   string
+	Location  string
+	Objects   string
+	Scene     *[]byte
+	SceneType string
+	Wizard    Wizard
 }
 
 type PereBodulClient interface {

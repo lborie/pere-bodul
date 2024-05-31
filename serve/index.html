@@ -146,7 +146,7 @@
         <div class="storyElement">
             <label for="ai_impl">Quel magicien écrit l'histoire ?</label>
             <select id="ai_impl" name="ai_impl">
-                <option value="gemini-pro">Gemini Pro</option>
+                <option value="gemini-1.5-flash-001">Gemini Pro</option>
                 <option value="OpenAI">OpenAI</option>
                 <option value="text-bison">Text Bison</option>
             </select>
@@ -166,6 +166,10 @@
         <div class="storyElement">
             <label for="objects">Objets à inclure dans l'histoire :</label>
             <input type="text" id="objects" name="objects">
+        </div>
+        <div class="storyElement">
+            <label for="scene">Avatar du héro :</label>
+            <input type="file" id="scene" name="scene" accept="image/png" />
         </div>
         <input type="submit" id="actionButton" value="Générer l'histoire">
     </form>
@@ -208,13 +212,18 @@
 
         for (var i = 0; i < formElements.length; i++) {
             if (formElements[i].name) {
+                if (formElements[i].type === 'file') {
+                    formData.append(formElements[i].name, formElements[i].files[0]);
+                    continue;
+                }
                 formData.append(formElements[i].name, formElements[i].value);
             }
         }
 
+        // Set content type to multipart/form-data
         fetch('/generateStory', {
             method: 'POST',
-            body: new URLSearchParams(formData),
+            body: formData,
         })
             .then(response => response.text())
             .then(data => {

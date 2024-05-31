@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"github.com/sirupsen/logrus"
 	"io"
+	"mime/multipart"
 	"net/http"
 )
 
@@ -129,8 +130,7 @@ func (c OpenAIClient) GenerateImagePrompt(_ context.Context, _ StoryParams, stor
 	return imagePrompt, nil
 }
 
-func (c OpenAIClient) GenerateImage(_ context.Context, _ StoryParams, imagePrompt string) (string, error) {
-
+func (c OpenAIClient) GenerateImage(_ context.Context, params StoryParams, imagePrompt string) (string, error) {
 	requestBody, _ := json.Marshal(map[string]interface{}{
 		"model":  "dall-e-3",
 		"prompt": imagePrompt,
@@ -141,6 +141,37 @@ func (c OpenAIClient) GenerateImage(_ context.Context, _ StoryParams, imagePromp
 	request, _ := http.NewRequest("POST", "https://api.openai.com/v1/images/generations", bytes.NewBuffer(requestBody))
 	request.Header.Set("Content-Type", "application/json")
 	request.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.OpenAIKey))
+
+	if params.Scene != nil {
+		body := new(bytes.Buffer)
+		writer := multipart.NewWriter(body)
+		err := writer.WriteField("model", "dall-e-2")
+		if err != nil {
+			return "", err
+		}
+		err = writer.WriteField("prompt", imagePrompt)
+		if err != nil {
+			return "", err
+		}
+		err = writer.WriteField("n", "1")
+		if err != nil {
+			return "", err
+		}
+		err = writer.WriteField("size", "1024x1024")
+		if err != nil {
+			return "", err
+		}
+		img, _ := writer.CreateFormFile("image", "image.jpg")
+		nb, err := io.Copy(img, bytes.NewReader(*params.Scene))
+		logrus.Infof("copied %d bytes", nb)
+		if err != nil {
+			return "", err
+		}
+		_ = writer.Close()
+		request, _ = http.NewRequest("POST", "https://api.openai.com/v1/images/edits", body)
+		request.Header.Add("Content-Type", writer.FormDataContentType())
+		request.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.OpenAIKey))
+	}
 
 	response, err := http.DefaultClient.Do(request)
 	if err != nil {

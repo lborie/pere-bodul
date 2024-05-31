@@ -5,14 +5,15 @@ import (
 	"encoding/json"
 	"github.com/lborie/pere-bodul/ai"
 	"github.com/sirupsen/logrus"
+	"io"
 	"net/http"
 )
 
 func StoryHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
-		err := r.ParseForm()
+		err := r.ParseMultipartForm(10 << 20) // 10 MB
 		if err != nil {
-			logrus.Error("erreur lors de l'analyse du formulaire : %s", err.Error())
+			logrus.Errorf("erreur lors de l'analyse du formulaire : %s", err.Error())
 			http.Error(w, "Erreur lors de l'analyse du formulaire", http.StatusInternalServerError)
 			return
 		}
@@ -30,7 +31,17 @@ func StoryHandler(w http.ResponseWriter, r *http.Request) {
 			Objects:  r.Form.Get("objects"),
 			Wizard:   wizard,
 		}
-
+		sceneFile, fileHeader, _ := r.FormFile("scene")
+		if sceneFile != nil {
+			content, err := io.ReadAll(sceneFile)
+			if err != nil {
+				logrus.Errorf("erreur reading picture : %s", err.Error())
+				http.Error(w, "Erreur reading picture", http.StatusInternalServerError)
+				return
+			}
+			storyParams.Scene = &content
+			storyParams.SceneType = fileHeader.Header.Get("Content-Type")
+		}
 		logrus.Infof("new form submitted: %v", storyParams)
 
 		// Implementation chosen by the user

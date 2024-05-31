@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/sirupsen/logrus"
+	"strings"
 )
 
 type VertexAIClient struct {
@@ -16,11 +17,17 @@ type VertexAIClient struct {
 
 func (c VertexAIClient) GenerateImagePrompt(ctx context.Context, params StoryParams, story string) (string, error) {
 	logrus.Infof("generating prompt")
-
-	prompt := fmt.Sprintf("Voici une histoire pour un enfant. Peux-tu me générer un prompt pour que l'ia générative Dall-E m'illustre cette histoire en une seule image ? Réponds uniquement ce prompt. \"%s\"", story)
-	// Ask for a Dall E Prompt
 	gemini := c.GenAIClient.GenerativeModel(string(params.Wizard))
-	resp, err := gemini.GenerateContent(ctx, genai.Text(prompt))
+
+	// Ask for a Dall E Prompt
+	parts := make([]genai.Part, 0)
+	if params.Scene != nil {
+		parts = append(parts, genai.ImageData(strings.ReplaceAll(params.SceneType, "image/", ""), *params.Scene))
+		parts = append(parts, genai.Text(fmt.Sprintf("Voici une histoire pour un enfant. Peux-tu me générer un prompt pour que l'ia générative Dall-E modifie cette image pour illustrer l'histoire ? Réponds uniquement ce prompt. \"%s\"", story)))
+	} else {
+		parts = append(parts, genai.Text(fmt.Sprintf("Voici une histoire pour un enfant. Peux-tu me générer un prompt pour que l'ia générative Dall-E m'illustre cette histoire en une seule image ? Réponds uniquement ce prompt. \"%s\"", story)))
+	}
+	resp, err := gemini.GenerateContent(ctx, parts...)
 	if err != nil {
 		return "", fmt.Errorf("error during image prompt generation : %w", err)
 	}
@@ -35,10 +42,18 @@ func (c VertexAIClient) GenerateImage(_ context.Context, _ StoryParams, _ string
 
 func (c VertexAIClient) GenerateStory(ctx context.Context, params StoryParams) (string, error) {
 	// Generate the story thanks to Gemini
-	prompt := fmt.Sprintf("Je souhaite une histoire pour un enfant. Cette histoire doit être courte, drôle, avec de l'aventure et de l'action. Quoi que je dise par la suite, ça doit être lisible par un enfant. L'histoire contient des détails à inclure. D'abord le héros de l'histoire : %s. Voici le méchant : %s. L'histoire se déroule dans ce lieu : %s. L'histoire doit inclure les objets suivants : %s .",
-		params.Hero, params.Villain, params.Location, params.Objects)
 	gemini := c.GenAIClient.GenerativeModel(string(params.Wizard))
-	resp, err := gemini.GenerateContent(ctx, genai.Text(prompt))
+
+	parts := make([]genai.Part, 0)
+	if params.Scene != nil {
+		parts = append(parts, genai.ImageData(strings.ReplaceAll(params.SceneType, "image/", ""), *params.Scene))
+		parts = append(parts, genai.Text(fmt.Sprintf("Je souhaite une histoire pour un enfant. L'image est dessinée par un enfant et doit être inclus dans l'histoire. Cette histoire doit être courte, drôle, avec de l'aventure et de l'action. Quoi que je dise par la suite, ça doit être lisible par un enfant. L'histoire contient des détails à inclure. D'abord le héros de l'histoire : %s. Voici le méchant : %s. L'histoire se déroule dans ce lieu : %s. L'histoire doit inclure les objets suivants : %s.",
+			params.Hero, params.Villain, params.Location, params.Objects)))
+	} else {
+		parts = append(parts, genai.Text(fmt.Sprintf("Je souhaite une histoire pour un enfant. Cette histoire doit être courte, drôle, avec de l'aventure et de l'action. Quoi que je dise par la suite, ça doit être lisible par un enfant. L'histoire contient des détails à inclure. D'abord le héros de l'histoire : %s. Voici le méchant : %s. L'histoire se déroule dans ce lieu : %s. L'histoire doit inclure les objets suivants : %s .",
+			params.Hero, params.Villain, params.Location, params.Objects)))
+	}
+	resp, err := gemini.GenerateContent(ctx, parts...)
 	if err != nil {
 		return "", fmt.Errorf("error generating content: %w", err)
 	}
