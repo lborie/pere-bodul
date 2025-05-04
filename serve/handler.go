@@ -18,6 +18,9 @@ func StoryHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		wizard := ai.Wizard(r.Form.Get("ai_impl"))
+		if wizard == "" {
+			wizard = ai.OpenAIWizard
+		}
 		if wizard != ai.GeminiWizard && wizard != ai.TextBizonWizard && wizard != ai.OpenAIWizard && wizard != ai.Llama3Wizard {
 			logrus.Errorf("wizard %s non reconnu", wizard)
 			http.Error(w, "ai_impl non reconnu", http.StatusBadRequest)
