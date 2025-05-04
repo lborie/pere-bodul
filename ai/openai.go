@@ -31,7 +31,7 @@ type GPTResponse struct {
 
 func (c OpenAIClient) completionWithPrompts(prompts []map[string]string) (string, error) {
 	requestBody, _ := json.Marshal(map[string]interface{}{
-		"model":    "gpt-4o",
+		"model":    "gpt-4o-mini",
 		"messages": prompts,
 	})
 
@@ -82,7 +82,7 @@ func (c OpenAIClient) GenerateStory(_ context.Context, params StoryParams) (stri
 
 func (c OpenAIClient) GenerateAudio(_ context.Context, _ StoryParams, story string) ([]byte, error) {
 	requestBody, _ := json.Marshal(map[string]interface{}{
-		"model": "tts-1",
+		"model": "gpt-4o-mini-tts",
 		"input": story,
 		"voice": "nova",
 	})
@@ -132,7 +132,7 @@ func (c OpenAIClient) GenerateImagePrompt(_ context.Context, _ StoryParams, stor
 func (c OpenAIClient) GenerateImage(_ context.Context, _ StoryParams, imagePrompt string) (string, error) {
 
 	requestBody, _ := json.Marshal(map[string]interface{}{
-		"model":  "dall-e-3",
+		"model":  "gpt-image-1",
 		"prompt": imagePrompt,
 		"n":      1,
 		"size":   "1024x1024",
