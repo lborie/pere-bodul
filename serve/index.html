@@ -2,234 +2,584 @@
 <html lang="fr">
 <head>
     <title>Père Bodul, raconte-nous un histoire !</title>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Pacifico">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Polices modernes et ludiques -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;800&family=Nunito:wght@400;600;800&display=swap">
     <style>
+        :root {
+            --primary: #FF6B6B;
+            --secondary: #4ECDC4;
+            --accent: #FFE66D;
+            --dark: #2F4858;
+            --light: #F7FFF7;
+            --success: #7AC74F;
+            --shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            --border-radius: 16px;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
         body {
-            font-family: Pacifico, Arial, sans-serif;
+            font-family: 'Nunito', sans-serif;
             margin: 0;
             padding: 0;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            justify-content: space-between;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);
+            background-attachment: fixed;
+            color: var(--dark);
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             background: url("/background.jpg") center no-repeat;
             background-size: cover;
-            height: 100vh;
-            gap: 10px;
+            opacity: 0.15;
+            z-index: -1;
         }
-
-        h2 {
-            text-align: center;
-            color: #343a40;
+        
+        /* Éléments flottants décoratifs */
+        .floating {
+            position: absolute;
+            z-index: -1;
+            animation: float 8s ease-in-out infinite;
+            opacity: 0.7;
         }
-
-        audio {
-            border: 10px solid white;
-            border-radius: 5px;
+        
+        .cloud1 {
+            top: 10%;
+            left: 10%;
+            font-size: 3rem;
+            animation-delay: 0s;
+        }
+        
+        .cloud2 {
+            top: 15%;
+            right: 15%;
+            font-size: 4rem;
+            animation-delay: 2s;
+        }
+        
+        .star1 {
+            bottom: 20%;
+            left: 8%;
+            font-size: 2rem;
+            animation-delay: 1s;
+        }
+        
+        .star2 {
+            bottom: 15%;
+            right: 10%;
+            font-size: 2.5rem;
+            animation-delay: 3s;
+        }
+        
+        @keyframes float {
+            0% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(5deg); }
+            100% { transform: translateY(0px) rotate(0deg); }
         }
 
         .header {
-            flex: 2;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            align-items: center;
-            background-color: #ffffff;
-            border-radius: 5px;
-            margin-top: 20px;
-            width: 90%;
+            text-align: center;
+            padding: 2rem 1rem;
+            margin-bottom: 1rem;
+        }
+
+        h1 {
+            font-family: 'Baloo 2', cursive;
+            font-size: 2.5rem;
+            color: var(--primary);
+            text-shadow: 2px 2px 0 var(--accent);
+            margin-bottom: 1rem;
+            animation: bounce 2s ease infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
         }
 
         .container {
             display: flex;
-            flex: 7;
-            justify-content: space-between;
-            margin: auto;
-            padding-left: 10px;
-            padding-right: 10px;
-            max-height: 70vh;
-            gap: 10px;
-            width: 90%
-        }
-
-        .bottom {
-            display: flex;
-            flex: 1;
-            align-items: center;
-        }
-
-        .storyElement {
-            display: flex;
-            flex: 1;
             flex-direction: column;
-            gap: 10px;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+            flex-grow: 1;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+        }
+
+        .story-form-container {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+        }
+        
+        .story-form-container::after {
+            content: "📝";
+            position: absolute;
+            bottom: -10px;
+            right: -10px;
+            font-size: 4rem;
+            opacity: 0.1;
+            transform: rotate(-15deg);
         }
 
         #storyForm {
-            display: flex;
-            flex-direction: row;
-            gap: 50px;
-            justify-content: space-between;
-            padding: 0 50px;
-            width: 90%;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            width: 100%;
         }
 
-        #storyContainer {
+        .form-group {
             display: flex;
-            flex: 1;
-            border-radius: 5px;
-            gap: 10px;
-
             flex-direction: column;
+            margin-bottom: 1rem;
+        }
+
+        label {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--dark);
+            font-size: 1.1rem;
+        }
+
+        input[type="text"], select {
+            padding: 0.8rem 1rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-family: 'Nunito', sans-serif;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background-color: white;
+        }
+
+        input[type="text"]:focus, select:focus {
+            border-color: var(--secondary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.2);
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 1rem;
+            grid-column: 1 / -1;
+        }
+
+        .btn {
+            display: inline-block;
+            background: var(--primary);
+            color: white;
+            font-family: 'Baloo 2', cursive;
+            font-size: 1.2rem;
+            font-weight: 600;
+            padding: 0.8rem 2rem;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .btn::before {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 0;
+            background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.1));
+            transition: height 0.3s ease;
+            z-index: -1;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .btn:hover::before {
+            height: 100%;
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Fixation des dimensions pour éviter les changements de layout */
+        .content-area {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+            width: 100%;
+        }
+        
+        @media (min-width: 768px) {
+            .content-area {
+                grid-template-columns: 3fr 2fr;
+            }
+        }
+
+        .story-container {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 1.5rem;
+            min-height: 300px;
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+        }
+        
+        .story-container::before {
+            content: "📖";
+            position: absolute;
+            top: -20px;
+            left: -20px;
+            font-size: 6rem;
+            opacity: 0.05;
+            transform: rotate(15deg);
         }
 
         #story {
-            background-color: #ffffff;
-            border-radius: 5px;
-            padding: 20px;
-            overflow-y: scroll;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 0.5rem;
         }
 
-        #metadataContainer {
+        /* Scrollbar personnalisé */
+        #story::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #story::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        #story::-webkit-scrollbar-thumb {
+            background: var(--secondary);
+            border-radius: 10px;
+        }
+
+        #story::-webkit-scrollbar-thumb:hover {
+            background: #3ab1a8;
+        }
+
+        /* Container de l'image et du lecteur audio */
+        .media-container {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 1.5rem;
             display: flex;
-            flex: 1;
-            align-items: center;
+            flex-direction: column;
+            gap: 1rem;
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+        }
+        
+        .media-container::after {
+            content: "🎨";
+            position: absolute;
+            bottom: -20px;
+            right: -20px;
+            font-size: 6rem;
+            opacity: 0.05;
         }
 
-        #imageLink {
-            // cadre autour de l'image
-            display: block;
-            border: 10px solid white;
-            border-radius: 5px;
-            margin: auto;
+        .image-wrapper {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            position: relative;
+            min-height: 200px; /* Hauteur minimale pour éviter le redimensionnement */
         }
 
         #image {
             max-width: 100%;
-            max-height: 65vh;
+            height: auto;
+            display: block;
+            border-radius: var(--border-radius);
+            /* Utiliser visibility au lieu de hidden pour maintenir l'espace */
+            visibility: hidden;
+            position: absolute;
         }
 
-        input[type="text"] {
+        #image.visible {
+            visibility: visible;
+            position: static;
+        }
+
+        .audio-wrapper {
             width: 100%;
-            padding: 10px;
-            margin-bottom: 20px;
-            border-radius: 5px;
-            border: 1px solid #ced4da;
-            box-sizing: border-box;
+            margin-top: 1rem;
+            min-height: 40px; /* Hauteur minimale pour éviter le redimensionnement */
+            position: relative;
         }
 
-        input[type="submit"] {
-            align-self: center;
-            background-color: #007bff;
-            color: #ffffff;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
+        audio {
+            width: 100%;
+            border-radius: 50px;
+            height: 40px;
+            background: var(--light);
+            /* Utiliser visibility au lieu de hidden pour maintenir l'espace */
+            visibility: hidden;
+            position: absolute;
         }
 
-        input[type="submit"]:disabled {
-            background-color: grey;
+        audio.visible {
+            visibility: visible;
+            position: static;
         }
 
-        input[type="submit"]:hover:enabled {
-            background-color: #0056b3;
+        /* Animation de chargement */
+        .loading-text {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
         }
 
+        .loading-dots span {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            margin: 0 3px;
+            animation: dots 1.5s infinite;
+        }
+
+        .loading-dots span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .loading-dots span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes dots {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 1.5rem;
+            margin-top: auto;
+            font-size: 0.9rem;
+        }
+
+        .footer a {
+            color: var(--dark);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        .footer a:hover {
+            color: var(--primary);
+        }
+        
+        /* Responsive design */
+        @media (max-width: 767px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .content-area {
+                grid-template-columns: 1fr;
+            }
+            
+            #storyForm {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 
 <body>
-<div class="header">
-    <h2>Père Bodul, raconte-nous une histoire !</h2>
-    <form id="storyForm">
-        <div class="storyElement">
-            <label for="ai_impl">Quel magicien écrit l'histoire ?</label>
-            <select id="ai_impl" name="ai_impl">
-                <option value="gemini-pro">Gemini Pro</option>
-                <option value="OpenAI">OpenAI</option>
-                <option value="text-bison">Text Bison</option>
-            </select>
-        </div>
-        <div class="storyElement">
-            <label for="hero">Qui est le héros ?</label>
-            <input type="text" id="hero" name="hero">
-        </div>
-        <div class="storyElement">
-            <label for="villain">Parlez moi du méchant ?</label>
-            <input type="text" id="villain" name="villain">
-        </div>
-        <div class="storyElement">
-            <label for="location">Où se situe l'histoire ?</label>
-            <input type="text" id="location" name="location">
-        </div>
-        <div class="storyElement">
-            <label for="objects">Objets à inclure dans l'histoire :</label>
-            <input type="text" id="objects" name="objects">
-        </div>
-        <input type="submit" id="actionButton" value="Générer l'histoire">
-    </form>
-</div>
+    <!-- Éléments décoratifs flottants -->
+    <div class="floating cloud1">☁️</div>
+    <div class="floating cloud2">☁️</div>
+    <div class="floating star1">✨</div>
+    <div class="floating star2">✨</div>
 
-<div class="container">
-    <div id="storyContainer">
-        <audio controls id="player" hidden></audio>
-        <div id="story">Quelle histoire souhaitez-vous générer ?</div>
+    <div class="header">
+        <h1>Père Bodul, raconte-nous une histoire !</h1>
     </div>
-    <div id = "metadataContainer">
-        <a id="imageLink" target="_blank" hidden><img id="image" hidden/></a>
+
+    <div class="container">
+        <div class="story-form-container">
+            <form id="storyForm">
+                <!-- <div class="form-group">
+                    <label for="ai_impl">Quel magicien écrit l'histoire ?</label>
+                    <select id="ai_impl" name="ai_impl">
+                        <option value="gemini">Gemini</option>
+                        <option value="gcp">GCP</option>
+                        <option value="openai">OpenAI</option>
+                    </select>
+                </div> -->
+                <div class="form-group">
+                    <label for="hero">Qui est le héros ?</label>
+                    <input type="text" id="hero" name="hero" placeholder="Par exemple: une licorne courageuse">
+                </div>
+                <div class="form-group">
+                    <label for="villain">Parle-moi du méchant...</label>
+                    <input type="text" id="villain" name="villain" placeholder="Par exemple: un dragon grognon">
+                </div>
+                <div class="form-group">
+                    <label for="location">Où se passe l'histoire ?</label>
+                    <input type="text" id="location" name="location" placeholder="Par exemple: dans une forêt enchantée">
+                </div>
+                <div class="form-group">
+                    <label for="objects">Objets magiques à inclure :</label>
+                    <input type="text" id="objects" name="objects" placeholder="Par exemple: une baguette magique, une carte au trésor">
+                </div>
+                <div class="btn-container">
+                    <button type="submit" id="actionButton" class="btn">✨ Générer l'histoire ✨</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="content-area">
+            <div class="story-container">
+                <div id="story">Quelle aventure magique veux-tu créer aujourd'hui ? Remplis le formulaire et clique sur le bouton pour générer une histoire merveilleuse !</div>
+            </div>
+            
+            <div class="media-container">
+                <div class="image-wrapper">
+                    <img id="image" alt="Illustration de l'histoire">
+                </div>
+                <div class="audio-wrapper">
+                    <audio controls id="player"></audio>
+                </div>
+            </div>
+        </div>
     </div>
-</div>
 
-<div class="bottom">
-    Fait avec ❤️ par <a target="_blank" href="https://github.com/lborie/pere-bodul">Bodul avec l'assistance de
-    ChatGPT et de Google</a>
-</div>
+    <div class="footer">
+        Fait avec ❤️ par <a target="_blank" href="https://github.com/lborie/pere-bodul">Bodul avec l'assistance de ChatGPT et de Google</a>
+    </div>
 
-<script>
-    var storyForm = document.querySelector('#storyForm');
-    var storyElement = document.querySelector('#story');
-    var playerElement = document.querySelector('#player');
-    var actionButton = document.querySelector('#actionButton');
-    var image = document.querySelector('#image');
-    var imageLink = document.querySelector('#imageLink');
+    <script>
+        var storyForm = document.querySelector('#storyForm');
+        var storyElement = document.querySelector('#story');
+        var playerElement = document.querySelector('#player');
+        var actionButton = document.querySelector('#actionButton');
+        var image = document.querySelector('#image');
 
-    storyForm.addEventListener('submit', function (event) {
-        event.preventDefault();
+        storyForm.addEventListener('submit', function (event) {
+            event.preventDefault();
 
-        var formElements = event.target.elements;
-        var formData = new FormData();
-        storyElement.innerText = "Veuillez patienter, l'histoire est en cours de génération...";
-        actionButton.disabled = true;
-        imageLink.hidden = true;
-        image.hidden = true;
-        playerElement.hidden = true;
-        actionButton.value = "Génération en cours...";
+            var formElements = event.target.elements;
+            var formData = new FormData();
+            
+            // Afficher le message de chargement avec animation
+            storyElement.innerHTML = '<div class="loading-text">Veuillez patienter, l\'histoire est en cours de génération<div class="loading-dots"><span></span><span></span><span></span></div></div>';
+            
+            actionButton.disabled = true;
+            
+            // Utiliser visibility au lieu de hidden pour maintenir la structure
+            image.classList.remove('visible');
+            playerElement.classList.remove('visible');
+            
+            actionButton.innerHTML = '⏳ Génération en cours...';
 
-        for (var i = 0; i < formElements.length; i++) {
-            if (formElements[i].name) {
-                formData.append(formElements[i].name, formElements[i].value);
+            for (var i = 0; i < formElements.length; i++) {
+                if (formElements[i].name) {
+                    formData.append(formElements[i].name, formElements[i].value);
+                }
             }
-        }
 
-        fetch('/generateStory', {
-            method: 'POST',
-            body: new URLSearchParams(formData),
-        })
-            .then(response => response.text())
-            .then(data => {
-                data = JSON.parse(data);
-                storyElement.innerText = data.story;
-                playerElement.src = 'data:audio/mpeg;base64,' + data.audio;
-                actionButton.disabled = false;
-                actionButton.value = "Re-Générer une histoire";
-                image.src = data.imageUrl;
-                imageLink.href = data.imageUrl;
-                imageLink.hidden = false;
-                image.hidden = false;
-                playerElement.hidden = false;
-            });
-    });
-</script>
+            fetch('/generateStory', {
+                method: 'POST',
+                body: new URLSearchParams(formData),
+            })
+                .then(response => response.text())
+                .then(data => {
+                    data = JSON.parse(data);
+                    
+                    // Ajouter une animation simple pour l'apparition du texte
+                    storyElement.style.opacity = 0;
+                    storyElement.innerText = data.story;
+                    
+                    // Animation de fondu pour faire apparaître l'histoire
+                    setTimeout(function() {
+                        storyElement.style.transition = 'opacity 0.5s ease';
+                        storyElement.style.opacity = 1;
+                    }, 100);
+                    
+                    playerElement.src = 'data:audio/mpeg;base64,' + data.audio;
+                    actionButton.disabled = false;
+                    actionButton.innerHTML = '✨ Nouvelle histoire ✨';
+                    
+                    // Préparer l'image
+                    if (data.imageUrl) {
+                        image.src = data.imageUrl;
+                    } else if (data.imageContent) {
+                        image.src = 'data:image/jpeg;base64,' + data.imageContent;
+                    }
+                    
+                    // Faire apparaître l'image et l'audio avec un délai en utilisant des classes
+                    setTimeout(function() {
+                        image.classList.add('visible');
+                        playerElement.classList.add('visible');
+                    }, 300);
+                })
+                .catch(error => {
+                    storyElement.innerText = "Oups ! Une erreur s'est produite. Essayons à nouveau !";
+                    actionButton.disabled = false;
+                    actionButton.innerHTML = '✨ Réessayer ✨';
+                });
+        });
+    </script>
 </body>
 </html>

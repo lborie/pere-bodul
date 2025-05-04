@@ -26,6 +26,7 @@ type GPTResponse struct {
 	} `json:"choices"`
 	Data []struct {
 		URL string `json:"url"`
+		B64 string `json:"b64_json"`
 	} `json:"data"`
 }
 
@@ -162,7 +163,7 @@ func (c OpenAIClient) GenerateImage(_ context.Context, _ StoryParams, imagePromp
 	}
 
 	if len(gptResponse.Data) > 0 {
-		return gptResponse.Data[0].URL, nil
+		return gptResponse.Data[0].B64, nil
 	}
 
 	return "", fmt.Errorf("aucune image générée")

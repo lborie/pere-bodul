@@ -93,9 +93,9 @@ func StoryHandler(w http.ResponseWriter, r *http.Request) {
 		// Send JSON
 		w.Header().Set("Content-Type", "application/json")
 		data := map[string]any{
-			"story":    story,
-			"audio":    audio,
-			"imageUrl": image,
+			"story":        story,
+			"audio":        audio,
+			"imageContent": image,
 		}
 		err = json.NewEncoder(w).Encode(data)
 		if err != nil {
